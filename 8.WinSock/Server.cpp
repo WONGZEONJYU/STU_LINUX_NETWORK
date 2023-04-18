@@ -2,6 +2,8 @@
 #include <WinSock2.h>
 #include <vector>
 
+//需在工程设置链接器(linker)输入选项添加ws2_32.lib
+
 using namespace std;
 
 int main()
