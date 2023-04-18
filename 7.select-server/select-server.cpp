@@ -92,18 +92,23 @@ int main()
 
                         int client {server_handler(server)};
 
-                        FD_SET(client,&reads);
+                        if( client > -1 ){
 
-                        max = ((client > max) ? client : max);
+                            FD_SET(client,&reads);
 
-                        std::cout << "accept client:" << client << std::endl;
+                            max = ((client > max) ? client : max);
+
+                            std::cout << "accept client:" << client << std::endl;
+                        }
 
                     } else{
                         
                         int r {client_handler(i)};
 
                         if (-1 == r){
+                            
                             FD_CLR(i,&reads);
+
                             close(i);
                         }
                     }
