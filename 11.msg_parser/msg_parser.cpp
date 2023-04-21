@@ -22,16 +22,16 @@ MParser * MParser_New()
 
 Message * MParser_ReadMem(MParser * parser,unsigned char * mem,unsigned int length)
 {
-    Message * ret {};
+    MsgParser * p { reinterpret_cast<MsgParser *>(parser) };
 
-    MsgParser * p {reinterpret_cast<MsgParser *>(parser)};
+    Message * ret {};
 
     if (p && mem && length){
         
         if (!p->header){    //解析数据头
             
-            if (p->need <= length){
-                
+            if (p->need <= length){     //内存至少有12个字节才能解析数据头
+
                 memcpy(&p->cache,mem,p->need);
 
                 p->cache.type = ntohs(p->cache.type);
@@ -39,10 +39,47 @@ Message * MParser_ReadMem(MParser * parser,unsigned char * mem,unsigned int leng
                 p->cache.index = ntohs(p->cache.index);
                 p->cache.total = ntohs(p->cache.total);
                 p->cache.length = ntohl(p->cache.length);
+
+                mem += p->need;//内存偏移
+                length -= p->need;//长度为内存剩余的字节数
+
+                p->header = 1;//标记数据头解释完成
+                p->need = p->cache.length;//所需的长度变为payload的长度
+
+                ret = MParser_ReadMem(p,mem,length);//递归调用，会进入else分支
             }
 
         }else{
-            
+
+            if (!p->msg){
+
+                p->msg = reinterpret_cast<Message * >(malloc(sizeof(p->cache) + p->need));
+
+                if (p->msg){
+                    *p->msg = p->cache;
+                }
+            }
+
+            if (p->msg){
+
+                unsigned int len { (p->need < length) ? p->need : length };
+
+                unsigned int offset { p->msg->length - p->need };
+
+                memcpy((p->msg->payload + offset),mem,len);
+
+                p->need -= len;
+
+            }
+
+            if (!p->need){
+                
+                ret = p->msg;
+
+                p->msg = nullptr;
+
+                MParser_Reset(p);
+            }
         }
     }
 
@@ -76,5 +113,13 @@ void MParser_Reset(MParser * parser)
 
 void MParser_Del(MParser * parser)
 {
+    MsgParser * p {reinterpret_cast<MsgParser *>(parser)};
 
+    if (p){
+
+        if (p->msg){
+            free(p->msg);
+            free(p);
+        }
+    }
 }
