@@ -4,7 +4,7 @@
 
 #include "message.h"
 
-typedef void MParser;
+using MParser = void;
 
 MParser * MParser_New();
 Message * MParser_ReadMem(MParser * parser,unsigned char * mem,unsigned int length);
