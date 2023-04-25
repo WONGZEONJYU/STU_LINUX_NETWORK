@@ -18,5 +18,9 @@ set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 
-add_executable(client client.cpp message.cpp msg_parser.cpp)
+include_directories(../../)
 
+add_executable(client 
+            client.cpp 
+            ../../message.cpp 
+            ../../msg_parser.cpp)

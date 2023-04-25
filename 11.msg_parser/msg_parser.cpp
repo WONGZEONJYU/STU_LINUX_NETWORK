@@ -1,8 +1,9 @@
-#include "msg_parser.h"
 #include <cstring>
 #include <malloc.h>
-#include <netinet/in.h>
+#include <arpa/inet.h>
 #include <unistd.h>
+#include "msg_parser.h"
+
 struct MsgParser
 {
     int header;         //标识消息头是否解析成功
@@ -42,15 +43,6 @@ static Message * ToLastState(MsgParser * p)
     return ret;
 }
 
-static void ntoh(Message * m)
-{
-    m->type = ntohs(m->type);
-    m->cmd = ntohs(m->cmd);
-    m->index = ntohs(m->index);
-    m->total = ntohs(m->total);
-    m->length = ntohl(m->length);
-}
-
 static int ToRecv(int fd,char * buf,int size)
 {
     int retry{},i{};
@@ -63,7 +55,7 @@ static int ToRecv(int fd,char * buf,int size)
             i += len;
         }else if (len < 0){ //读取数据出错
             break;
-        }else{   // 0 == len
+        }else{   //0 == len
             if (++retry > 5){
                 break;
             }
@@ -79,6 +71,7 @@ MParser * MParser_New()
     MParser * ret {calloc(1,sizeof(MsgParser))};
 
     if (ret){
+
         InitState(reinterpret_cast<MsgParser * >(ret));
     }
 
@@ -103,7 +96,7 @@ Message * MParser_ReadMem(MParser * parser,unsigned char * mem,unsigned int leng
 
             if (p->need == len){     //内存至少有12个字节才能解析数据头
 
-                ntoh(&p->cache);//网络字节序转换成本机字节序
+                Message_N2H(&p->cache);//网络字节序转换成本机字节序
 
                 mem += p->need;     //内存偏移
                 length -= p->need;  //内存长度减去已经读取的header的个数
@@ -141,7 +134,7 @@ Message * MParser_ReadMem(MParser * parser,unsigned char * mem,unsigned int leng
     return ret;
 }
 
-Message * MParser_Fd(MParser * parser,int fd) 
+Message * MParser_ReadFd(MParser * parser,int fd) 
 {
     Message * ret {};
 
@@ -157,10 +150,10 @@ Message * MParser_Fd(MParser * parser,int fd)
 
             if (len == p->need){
 
-                ntoh(&p->cache);//网络字节序转换成本机字节序
+                Message_N2H(&p->cache);//网络字节序转换成本机字节序
 
                 if (ToMidState(p)){     //切换到中间态
-                    ret = MParser_Fd(p,fd); //递归调用,进入到读取payload分支
+                    ret = MParser_ReadFd(p,fd); //递归调用,进入到读取payload分支
                 }else{
                     InitState(p);
                 }
