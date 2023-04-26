@@ -97,7 +97,7 @@ int TcpClient_RecvRaw(TcpClient* client, char* buf, int length)
     return ret;
 }
 
-int TcpClient_Connect(TcpClient* client, char* ip, int port)
+int TcpClient_Connect(TcpClient* client, const char* ip, int port)
 {
     int ret {TcpClient_IsValid(client)};
 
@@ -150,7 +150,7 @@ void TcpClient_Close(TcpClient* client)
     }
 }
 
-void TcoClient_Del(TcpClient* client)
+void TcpClient_Del(TcpClient* client)
 {
     Client * c {reinterpret_cast<Client *>(client)};
 

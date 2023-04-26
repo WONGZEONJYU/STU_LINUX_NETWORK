@@ -66,6 +66,7 @@ int main()
     }
 
     cout << "server start success" << endl;
+
     cout << "server socket_fd :" << server << endl;
 
     int max{server};
@@ -105,7 +106,7 @@ int main()
 
                     } else{
                         
-                        int r {client_handler(i)};
+                        int r { client_handler(i) };
 
                         if (-1 == r){
                             

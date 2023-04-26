@@ -45,7 +45,7 @@ int main()
         int client {accept(server,reinterpret_cast<sockaddr *>(&caddr),&asize)};
 
         if (-1 == client){
-            cout << "client accept success" << endl;
+            cout << "client accept error" << endl;
             return -1;
         }
 

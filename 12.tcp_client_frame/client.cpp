@@ -13,49 +13,29 @@ using namespace std;
 
 int main() 
 {
-    // int sock{socket(PF_INET,SOCK_STREAM,0)};
+    TcpClient * client {TcpClient_New()};
 
-    // if (-1 == sock){
-    //     cout << "socket error" << endl;
-    //     return -1;
-    // }
+    if (client && TcpClient_Connect(client,"127.0.0.1",8888)){
 
-    // sockaddr_in addr {};
-    // addr.sin_family = AF_INET;
-    // addr.sin_addr.s_addr = inet_addr("127.0.0.1");
-    // addr.sin_port = htons(8888);
+        const char * test {"wongzeonjyu"};
 
-    // if ( -1 == connect( sock,reinterpret_cast<sockaddr *>(&addr),sizeof(addr) )){
-    //     cout << "connect error" << endl;
-    //     return -1;
-    // }
+        for (int i {}; i < strlen(test); i++){
 
-    
+            char buf[2]{};
 
-    cout << "connect success sock :" << sock << endl;
+            buf[0] = test[i];
 
-    const char * test {"HelloWorld"};
+            Message *pm { Message_New(128,129,i,strlen(test),buf,2) };
 
-    for (int i {}; i < strlen(test); i++){
+            TcpClient_SendMsg(client,pm);
 
-        char buf[2]{};
+            free(pm);
+        }
 
-        buf[0] = test[i];
-
-        Message *pm { Message_New(128,129,i,strlen(test),buf,2) };
-
-        Message_H2N(pm);
-
-        send(sock,pm,(sizeof(Message) + 2),0);
-
-        //usleep(1000);
-
-        free(pm);
+        getchar();
     }
 
-    getchar();
-
-    close(sock);
+    TcpClient_Del(client);
 
     return 0;
 }
