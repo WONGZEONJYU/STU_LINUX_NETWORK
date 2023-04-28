@@ -42,8 +42,7 @@ TcpServer * TcpServer_New()
 
 int TcpServer_Start(TcpServer * server,int port,int max)
 {
-    int ret{};
-
+    
     Server * s { reinterpret_cast<Server *>(server) };
 
     if (s && (!s->valid)){
@@ -56,42 +55,77 @@ int TcpServer_Start(TcpServer * server,int port,int max)
 
         saddr.sin_family = AF_INET;
 
-        saddr.sin_addr.s_addr = htonl(INADDR_ANY);//htonl函数把小端转换成大端（网络字节序采用大端）
+        saddr.sin_addr.s_addr = htonl(INADDR_ANY);                                                              //htonl函数把小端转换成大端（网络字节序采用大端）
 
         saddr.sin_port = htons(port);
 
         s->valid = s->valid && bind( s->fd,reinterpret_cast<const sockaddr *>(&saddr),sizeof(saddr) );
 
-        s->valid = s->valid && listen(s->fd,1);
+        s->valid = s->valid && (-1 != listen(s->fd,1));
 
     }
-    
-    return ret;
+
+    return s->valid;
 }
 
 void TcpServer_Stop(TcpServer * server)
 {
     Server * s {reinterpret_cast<Server *>(server)};
+
+    if (s){
+
+        s->valid = 0;
+
+        close(s->fd);
+
+        for (int i {}; i < FD_SIZE; i++) {
+
+            TcpClient_Del(s->client[i]);
+
+            s->client[i] = nullptr;
+        }
+
+    }
 }
 
 void TcpServer_SetListener(TcpServer * server,Listener listener)
 {
+    Server * s {reinterpret_cast<Server *>(server)};
+
+    if (s){
+        s->cb = listener;
+    }
     
 }
 
 int TcpServer_IsValid(TcpServer * server)
 {
-    int ret {};
+    Server * s {reinterpret_cast<Server *>(server)};
 
-    return ret;
+    return s ? s->valid : 0;
 }
 
 void TcpServer_DoWork(TcpServer * server)
 {
+    Server * s {reinterpret_cast<Server *>(server)};
 
+    if (s && s->valid){
+        
+        
+
+
+
+
+
+
+
+
+    }
 }
 
 void TcpServer_Del(TcpServer * server)
 {
+    TcpServer_Stop(server);
 
+    free(server);
 }
