@@ -55,13 +55,13 @@ int TcpServer_Start(TcpServer * server,int port,int max)
 
         saddr.sin_family = AF_INET;
 
-        saddr.sin_addr.s_addr = htonl(INADDR_ANY);                                                              //htonl函数把小端转换成大端（网络字节序采用大端）
+        saddr.sin_addr.s_addr = htonl(INADDR_ANY); //htonl函数把小端转换成大端（网络字节序采用大端）
 
         saddr.sin_port = htons(port);
 
         s->valid = s->valid && bind( s->fd,reinterpret_cast<const sockaddr *>(&saddr),sizeof(saddr) );
 
-        s->valid = s->valid && (-1 != listen(s->fd,1));
+        s->valid = s->valid && (-1 != listen(s->fd,max));
 
     }
 
@@ -110,16 +110,28 @@ void TcpServer_DoWork(TcpServer * server)
     Server * s {reinterpret_cast<Server *>(server)};
 
     if (s && s->valid){
-        
-        
 
+        int max{s->fd};
 
+        fd_set reads{};
 
+        FD_ZERO(&reads);
+        FD_SET(s->fd,&reads);
 
+        while( s->valid ) {
 
+            fd_set reset { reads };
 
+            timeval timeout{ .tv_sec = 0,.tv_usec = 10000 };
 
+            int num{ select((max + 1),&reset,nullptr,nullptr,&timeout) };
 
+            if (num > 0){
+                
+                max = SelectHandler(s, &rset, &reads, num, max);
+
+            }
+        }
     }
 }
 
