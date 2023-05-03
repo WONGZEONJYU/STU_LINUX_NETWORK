@@ -1,6 +1,7 @@
 #include "message.h"
 #include <malloc.h>
 #include <string.h>
+#include <arpa/inet.h>
 
 Message * Message_New(unsigned short type,
                     unsigned short cmd,
@@ -24,4 +25,44 @@ Message * Message_New(unsigned short type,
     }
     
     return ret;
+}
+
+int Message_Size(Message *m)
+{
+    int ret {};
+
+    if (m){
+
+        ret = sizeof(Message) + m->length;
+    }
+
+    return ret;
+}
+
+Message *Message_N2H(Message *m)
+{
+    if (m){
+
+        m->type = ntohs(m->type);
+        m->cmd = ntohs(m->cmd);
+        m->index = ntohs(m->index);
+        m->total = ntohs(m->total);
+        m->length = ntohl(m->length);
+    }
+
+    return m;
+}
+
+Message *Message_H2N(Message *m)
+{
+    if (m){
+
+        m->type = htons(m->type);
+        m->cmd = htons(m->cmd);
+        m->index = htons(m->index);
+        m->total = htons(m->total);
+        m->length = htonl(m->length);
+    }
+
+    return m;
 }

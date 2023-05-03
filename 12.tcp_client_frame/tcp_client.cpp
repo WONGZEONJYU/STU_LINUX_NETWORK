@@ -99,7 +99,7 @@ int TcpClient_RecvRaw(TcpClient* client, char* buf, int length)
 
 int TcpClient_Connect(TcpClient* client, const char* ip, int port)
 {
-    int ret {TcpClient_IsValid(client)};
+    int ret { TcpClient_IsValid(client) };
 
     Client * c {reinterpret_cast<Client *>(client)};
     
@@ -120,13 +120,13 @@ int TcpClient_IsValid(TcpClient* client)
 {
     int ret{};
 
-    Client * c {reinterpret_cast<Client *>(client)};
+    Client * c { reinterpret_cast<Client *>(client) };
 
     if (c){
 
         tcp_info info{};
 
-        socklen_t l {sizeof(info)};
+        socklen_t l { sizeof(info) };
 
         getsockopt(c->fd, IPPROTO_TCP ,TCP_INFO, &info, &l);
 
@@ -138,7 +138,7 @@ int TcpClient_IsValid(TcpClient* client)
 
 void TcpClient_Close(TcpClient* client)
 {
-    Client * c {reinterpret_cast<Client *>(client)};
+    Client * c { reinterpret_cast<Client *>(client) };
 
     if (c){
 
@@ -174,7 +174,7 @@ void TcpClient_SetData(TcpClient* client, void* data)
     }
 }
 
-void* TcpClient_GetData(TcpClient* client)
+void * TcpClient_GetData(TcpClient* client)
 {
     void *ret {};
 

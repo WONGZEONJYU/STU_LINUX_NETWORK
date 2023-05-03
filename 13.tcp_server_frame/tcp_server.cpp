@@ -42,11 +42,10 @@ TcpServer * TcpServer_New()
 
 int TcpServer_Start(TcpServer * server,int port,int max)
 {
-    
     Server * s { reinterpret_cast<Server *>(server) };
 
-    if (s && (!s->valid)){
-        
+    if (s && (!s->valid)) {
+
         s->fd = socket(PF_INET,SOCK_STREAM,0);
 
         s->valid = (-1 != s->fd);
@@ -59,7 +58,7 @@ int TcpServer_Start(TcpServer * server,int port,int max)
 
         saddr.sin_port = htons(port);
 
-        s->valid = s->valid && bind( s->fd,reinterpret_cast<const sockaddr *>(&saddr),sizeof(saddr) );
+        s->valid = s->valid && (-1 != bind( s->fd,reinterpret_cast<const sockaddr *>(&saddr),sizeof(saddr) ));
 
         s->valid = s->valid && (-1 != listen(s->fd,max));
 
@@ -95,7 +94,6 @@ void TcpServer_SetListener(TcpServer * server,Listener listener)
     if (s){
         s->cb = listener;
     }
-    
 }
 
 int TcpServer_IsValid(TcpServer * server)
@@ -103,6 +101,68 @@ int TcpServer_IsValid(TcpServer * server)
     Server * s {reinterpret_cast<Server *>(server)};
 
     return s ? s->valid : 0;
+}
+
+static int SelectHandler(Server  *s ,
+                        fd_set * rest,fd_set * reads,
+                        int num,int max)
+{
+    int ret {max};
+
+    //for (int i {0}; i <= max; i++){
+    for (int i {s->fd}; i <= max; i++){
+
+        if (FD_ISSET(i,rest)){
+
+            int index {i},event {-1};
+
+            if (index == s->fd){
+
+                sockaddr_in addr{};
+
+                socklen_t asize {sizeof(addr)};
+
+                index = accept(s->fd,reinterpret_cast<sockaddr *>(&addr),&asize);
+
+                if (index > -1) {
+
+                    FD_SET(index,reads);
+
+                    ret = (index > max ) ? index : max;
+
+                    s->client[index] = TcpClient_From(index);
+
+                    event = EVT_CONN;
+                }
+
+            }else{
+                event = EVT_DATA;
+            }
+
+            if (s->cb){
+
+                if (TcpClient_IsValid(s->client[index])){
+
+                    s->cb(s->client[index],event);
+                }else{
+
+                    if (s->client[index]){
+
+                        s->cb(s->client[index],EVT_CLOSE);
+                    }
+
+                    TcpClient_Del(s->client[index]);
+
+                    s->client[index] = nullptr;
+
+                    FD_CLR(index,reads);
+
+                }
+            }
+        }
+    }
+
+    return ret;
 }
 
 void TcpServer_DoWork(TcpServer * server)
@@ -120,11 +180,11 @@ void TcpServer_DoWork(TcpServer * server)
 
         while( s->valid ) {
 
-            fd_set reset { reads };
+            fd_set rset { reads };
 
             timeval timeout{ .tv_sec = 0,.tv_usec = 10000 };
 
-            int num{ select((max + 1),&reset,nullptr,nullptr,&timeout) };
+            int num{ select((max + 1),&rset,nullptr,nullptr,&timeout) };
 
             if (num > 0){
                 

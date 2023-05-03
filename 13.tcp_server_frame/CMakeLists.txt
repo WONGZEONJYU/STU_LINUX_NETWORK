@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(tcp_client_frame)
+project(tcp_server_frame)
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -19,10 +19,11 @@ set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 
 include_directories(../11.msg_parser/)
+include_directories(../12.tcp_client_frame/)
 
-add_executable(tcp_client_frame 
+add_executable(tcp_server_frame 
             server.cpp
-            tcp_client.cpp
             tcp_server.cpp
+            ../12.tcp_client_frame/tcp_client.cpp
             ../11.msg_parser/message.cpp 
             ../11.msg_parser/msg_parser.cpp)

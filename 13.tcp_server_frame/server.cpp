@@ -1,92 +1,78 @@
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netinet/tcp.h>
-#include <arpa/inet.h>
 #include <cstdio>
 #include <unistd.h>
 #include <cstring>
 #include <iostream>
 #include <iomanip>
 #include "msg_parser.h"
-#include "tcp_client.h"
+#include "tcp_server.h"
 
 using namespace std;
 
-int main() 
-{
-    int server { socket(PF_INET,SOCK_STREAM,0) };
+void EventListener(TcpClient * client,int evt){
 
-    if (-1 == server){
+    if (EVT_CONN == evt){
 
-        cout << "server socket error" << endl;
+        cout << "Connect : " << client << endl;
+        
+    }else if (EVT_DATA == evt){
+       
+        Message * m { TcpClient_RecvMsg(client) };
 
-        return -1;
-    }
+        if (m) {
 
-    sockaddr_in saddr {};
+            // cout << "index = " << m->index << " total = " << m->total << " payload = " << m->payload << endl;
 
-    saddr.sin_family = AF_INET;
+            // free(m);
 
-    saddr.sin_addr.s_addr = htonl(INADDR_ANY);//htonl函数把小端转换成大端（网络字节序采用大端）
+            char * s { reinterpret_cast<char *>(TcpClient_GetData(client)) };
 
-    saddr.sin_port = htons(8888);
+            //cout << "s = " << s << endl;
+            //printf("s = %s\r\n",s);
 
-    if ( -1 == bind( server,reinterpret_cast<const sockaddr *>(&saddr),sizeof(saddr) ) ){
+            if (0 == m->index){
 
-        cout << "server bind error" << endl;
+                s = reinterpret_cast<char *>(malloc(m->total + 1));
 
-        return -1;
-    }
-
-    if ( -1 == listen(server,1) ){
-        cout << "server listen error" << endl;
-        return -1;
-    }
-
-    cout << "server start success" << endl;
-
-    MParser * parser { MParser_New() };
-
-    while (true){
-
-        sockaddr_in caddr {};
-
-        socklen_t asize {sizeof(caddr)};
-
-        int client { accept(server,reinterpret_cast<sockaddr *>(&caddr),&asize) };
-
-        if (-1 == client){
-            cout << "client accept error" << endl;
-            return -1;
-        }
-
-        TcpClient * c { TcpClient_From(client) };
-
-        cout << "client :" << client << endl; //client的数值表示系统资源的id
-
-        cout << "c addr = " << c << endl;
-
-        do{
-
-            Message * m { TcpClient_RecvMsg(c) };
-
-            if (m){
-
-                cout << "payload = " << m->payload << endl;
-
-                free(m);
+                TcpClient_SetData(client,s);
             }
 
-        } while (TcpClient_IsValid(c));
+            strcpy(s + m->index , reinterpret_cast<char *>(m->payload));
 
-        cout << "client socket is closed!" << endl;
+            if ((m->index + 1) == m->total){
 
-        TcpClient_Del(c);
+                cout <<  "Data :" << s << endl;
+
+                free(s);
+            }
+
+            free(m);
+        }
+
+    }else if (EVT_CLOSE == evt){
+        cout << "Close :"  << client << endl;
+    }
+}
+
+int main(int argc, char const *argv[])
+{
+    TcpServer * server {TcpServer_New()};
+
+    if (server){
+
+        int r { TcpServer_Start(server,8888,20) };
+
+        cout << "r = " << r << endl;
+
+        if (r)
+        {
+            TcpServer_SetListener(server,EventListener);
+
+            TcpServer_DoWork(server);
+        }
+
     }
 
-    close(server);
+    TcpServer_Del(server);
 
     return 0;
 }
-
