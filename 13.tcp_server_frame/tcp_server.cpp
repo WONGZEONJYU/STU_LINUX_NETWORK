@@ -189,7 +189,6 @@ void TcpServer_DoWork(TcpServer * server)
             if (num > 0){
                 
                 max = SelectHandler(s, &rset, &reads, num, max);
-
             }
         }
     }
