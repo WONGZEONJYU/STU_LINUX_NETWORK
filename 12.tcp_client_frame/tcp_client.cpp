@@ -187,3 +187,18 @@ void * TcpClient_GetData(TcpClient* client)
 
     return ret;
 }
+
+int TcpClient_Available(TcpClient* client)
+{
+    int ret {-1};
+
+    Client * c {reinterpret_cast<Client *>(client)};
+
+    if (c){
+        
+        static char c_temp[1024 * 2] {};
+        ret = recv(c->fd,c_temp,sizeof(c_temp),MSG_PEEK | MSG_DONTWAIT);
+    }
+
+    return ret;
+}

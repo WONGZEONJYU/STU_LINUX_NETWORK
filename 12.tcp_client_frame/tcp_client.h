@@ -17,6 +17,7 @@ int TcpClient_Connect(TcpClient* client, const char* ip, int port);
 int TcpClient_IsValid(TcpClient* client); 
 void TcpClient_Close(TcpClient* client); 
 void TcpClient_Del(TcpClient* client);
+int TcpClient_Available(TcpClient* client);
 
 void TcpClient_SetData (TcpClient* client, void* data);
 void* TcpClient_GetData(TcpClient* client);
