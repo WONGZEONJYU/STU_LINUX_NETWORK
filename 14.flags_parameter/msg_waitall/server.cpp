@@ -51,16 +51,14 @@ int main()
 
         cout << "client :" << client << endl; //client的数值表示系统资源的id
 
-        int r {},len{};
-
         do{
-            
+
             for (int i {}; i < 2; i++){
 
                 int len[] {11,4};
                 char buf[32]{};
 
-                r = recv(client,buf,len[i],MSG_WAITALL);
+                int r ( recv(client,buf,len[i],MSG_WAITALL) );
 
                 if (r > 0){
 
