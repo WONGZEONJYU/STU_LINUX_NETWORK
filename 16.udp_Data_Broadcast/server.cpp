@@ -30,27 +30,26 @@ int main()
 
     cout << "udp server start success" << endl;
 
-    //char buf[32] {"WONGZEONJYU"};
+    sockaddr_in remote {};
+
+    remote.sin_family = AF_INET;
+    //remote.sin_addr.s_addr = inet_addr("10.211.55.255");  //直接广播，需知道当前网络标识
+    remote.sin_addr.s_addr = 0xffffffff;                    //本地广播，不经过路由器
+    remote.sin_port = htons(9000);
+    socklen_t len {sizeof(remote)};
+
+    int brd {1};
+    setsockopt(server,SOL_SOCKET,SO_BROADCAST,&brd,sizeof(brd));
+
+    char buf[32]{"WONGZEONJYU"};
+    int r(strlen(buf));
+    buf[r] = 0;
 
     while (true){
 
-        sockaddr_in remote {};
-
-        socklen_t len {sizeof(remote)};
-
-        char buf[128]{};
-
-        int r (recvfrom(server,buf,sizeof(buf),0,reinterpret_cast<sockaddr * >(&remote),&len));
-
-        buf[r] = 0;
-
-        cout << "r = " << r << endl;
-        cout << "buf = " << buf << endl;
-        cout << "remote ip = " << inet_ntoa(remote.sin_addr) << endl;
-        cout << "remote port = " << ntohs(remote.sin_port) << endl;
-
         sendto(server,buf,r,0,reinterpret_cast<const sockaddr * >(&remote),len);
 
+        sleep(1);
     }
 
     close(server);
