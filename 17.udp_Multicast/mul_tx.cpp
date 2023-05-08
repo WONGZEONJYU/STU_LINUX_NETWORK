@@ -58,21 +58,27 @@ int main()
         // cout << "current loop = " << loop << endl;
     }
 
-    sockaddr_in addr{};
-    len = sizeof(addr);
-    getsockopt(server,IPPROTO_IP,IP_MULTICAST_IF,&addr,&len);
-    cout << "ip = " << inet_ntoa(addr.sin_addr) << endl;
+    {    
+        in_addr addr;
+        // len = sizeof(addr);
+        // getsockopt(server,IPPROTO_IP,IP_MULTICAST_IF,&addr,&len);
+        // cout << "ip = " << inet_ntoa(addr) << endl;
+
+        addr.s_addr = inet_addr("10.211.55.3");//采用那个网卡作为多播的发送网卡
+        //addr.s_addr = htonl(INADDR_ANY);//多个网卡不建议采用0.0.0.0这个地址，有可能出现接收端无法收到数据的情况
+        len = sizeof(addr);
+        setsockopt(server,IPPROTO_IP,IP_MULTICAST_IF,&addr,len);
+        cout << "ip = " << inet_ntoa(addr) << endl;
+    }
 
     sockaddr_in remote {};
     remote.sin_family = AF_INET;
     remote.sin_addr.s_addr = inet_addr("224.1.1.168");
     remote.sin_port = htons(9000);
+    len = sizeof(remote);
 
     char buf[32]{"WONGZEONJYU"};
     const int r(strlen(buf));
-    buf[r] = 0;
-
-    len = sizeof(remote);
 
     while (true){
 
