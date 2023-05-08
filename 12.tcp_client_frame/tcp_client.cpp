@@ -5,7 +5,7 @@
 #include <arpa/inet.h>
 #include <netinet/tcp.h>
 #include <unistd.h>
-#include "../11.msg_parser/msg_parser.h"
+#include "msg_parser.h"
 
 struct Client
 {
@@ -28,11 +28,12 @@ TcpClient* TcpClient_From(int fd)
         ret->fd = fd;
 
         ret->parser = MParser_New();
-        
+
         ret->data = nullptr;
     }
 
     return (ret && ret->parser) ? ret : (free(ret),nullptr);
+
 }
 
 int TcpClient_SendMsg(TcpClient* client, Message* msg)
