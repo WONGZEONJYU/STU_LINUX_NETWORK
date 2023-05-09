@@ -4,10 +4,12 @@
 #include <netinet/tcp.h> 
 #include <arpa/inet.h>
 #include <unistd.h>
-#include <malloc.h>
+#include <cstdlib>
 #include <cstring>
+#include <iostream>
 #include "msg_parser.h"
 #include "udp_point.h"
+
 struct Point
 {
     int fd;
@@ -124,8 +126,8 @@ Message* UdpPoint_RecvMsg(UdpPoint* point, char* remote, int* port)
 
     Message * ret{};
 
-    if (c && remote && port){
-        
+    if (c){
+
         sockaddr_in raddr {};
 
         socklen_t addrlen {sizeof(raddr)};
@@ -133,7 +135,7 @@ Message* UdpPoint_RecvMsg(UdpPoint* point, char* remote, int* port)
         int length ( recvfrom(c->fd, g_temp, sizeof(g_temp), //窥探一下当前有多少数据
                     MSG_PEEK, reinterpret_cast<sockaddr*>(&raddr), &addrlen) );
 
-        unsigned char* buf {(length > 0) ? reinterpret_cast<unsigned char *>(malloc(length)) : nullptr};
+        unsigned char * buf { (length > 0) ? reinterpret_cast<unsigned char *>(malloc(length)) : nullptr };
 
         length = recvfrom(c->fd, buf, length, 0, 
                         reinterpret_cast<sockaddr*>(&raddr), &addrlen);
@@ -142,7 +144,7 @@ Message* UdpPoint_RecvMsg(UdpPoint* point, char* remote, int* port)
 
             ret = MParser_ReadMem(c->parser,buf,length);
         }
-        
+
         if(ret){
 
             ParseAddr(raddr,remote,port);//解析发送端的 IP地址及端口号
@@ -158,7 +160,7 @@ int UdpPoint_RecvRaw(UdpPoint* point, char* buf, int length, char* remote, int* 
 
     int ret {-1};
 
-    if (c && buf && remote && port){
+    if (c && buf){
 
         sockaddr_in addr{};
 
@@ -255,4 +257,3 @@ int UdpPoint_GetOpt(UdpPoint* point, int level, int optname, void* optval, unsig
 
     return ret;
 }
-
