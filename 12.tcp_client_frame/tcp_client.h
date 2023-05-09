@@ -22,4 +22,7 @@ int TcpClient_Available(TcpClient* client);
 void TcpClient_SetData (TcpClient* client, void* data);
 void* TcpClient_GetData(TcpClient* client);
 
+int TcpClient_SetOpt(TcpClient* point, int level, int optname, const void* optval, unsigned int optlen);
+int TcpClient_GetOpt(TcpClient* client, int level, int optname, void* optval, unsigned int* optlen);
+
 #endif

@@ -29,4 +29,7 @@ void TcpServer_DoWork(TcpServer * server);    //用于服务端工作
 
 void TcpServer_Del(TcpServer * server);    //销毁服务端
 
+int TcpServer_SetOpt(TcpServer * server,int level, int optname, const void* optval, unsigned int optlen);
+int TcpServer_GetOpt(TcpServer * server, int level, int optname, void* optval, unsigned int* optlen);
+
 #endif

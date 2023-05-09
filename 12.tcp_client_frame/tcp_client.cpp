@@ -203,3 +203,31 @@ int TcpClient_Available(TcpClient* client)
 
     return ret;
 }
+
+int TcpClient_SetOpt(TcpClient* client,int level, int optname, const void* optval, unsigned int optlen)
+{
+    Client * c {reinterpret_cast<Client *>(client)};
+
+    int ret{-1};
+
+    if (c){
+        ret = setsockopt(c->fd,level,optname,optval,optlen);
+    }
+
+    return ret;
+}
+
+int TcpClient_GetOpt(TcpClient* client, int level, int optname, void* optval, unsigned int* optlen)
+{
+    Client * c {reinterpret_cast<Client *>(client)};
+
+    int ret {-1};
+
+    if (c){
+        ret = getsockopt(c->fd,level,optname,optval,optlen);
+    }
+
+    return ret;
+}
+
+

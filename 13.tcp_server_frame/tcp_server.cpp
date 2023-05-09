@@ -200,3 +200,30 @@ void TcpServer_Del(TcpServer * server)
 
     free(server);
 }
+
+int TcpServer_SetOpt(TcpServer * server,int level, int optname, const void* optval, unsigned int optlen)
+{
+    Server * s {reinterpret_cast<Server *>(server)};
+
+    int ret{-1};
+
+    if (s){
+        ret = setsockopt(s->fd,level,optname,optval,optlen);
+    }
+
+    return ret;
+}
+
+int TcpServer_GetOpt(TcpServer * server, int level, int optname, void* optval, unsigned int* optlen)
+{
+    Server * s {reinterpret_cast<Server *>(server)};
+
+    int ret {-1};
+
+    if (s){
+        ret = getsockopt(s->fd,level,optname,optval,optlen);
+    }
+
+    return ret;
+}
+
