@@ -84,7 +84,7 @@ Message * MParser_ReadMem(MParser * parser,unsigned char * mem,unsigned int leng
 
     Message * ret {};
 
-    if (p && mem && length){
+    if (p && mem){
         
         if (!p->header){    //解析数据头
 
