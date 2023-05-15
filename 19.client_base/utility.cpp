@@ -24,24 +24,23 @@ char * FormatByChar(const char* src, char c)  // O(n)
     if( ret )
     {
         int i {},j{};
-
+        bool flag {};
+        
         while( (i < len) && (src[i] == c) ) {
             ++i;
         }
-
-        int flag {};
 
         while( i < len ){
 
             if( src[i] != c ){
 
                 ret[j++] = src[i];
-                flag = 0;
+                flag = false;
             }else{
 
                 if( !flag ){
                     ret[j++] = src[i];
-                    flag = 1;
+                    flag = true;
                 }
             }
 

@@ -39,7 +39,7 @@ int main(int argc, char const *argv[])
 {
     cout << "test main " << endl;
 
-    char buf[BUF_SIZE]{};
+    char line[BUF_SIZE]{};
 
     char ** arg {Malloc2d<char>(2, BUF_SIZE)};
 
@@ -47,15 +47,32 @@ int main(int argc, char const *argv[])
 
         cout << "Input >>> ";
 
-        cin >> buf;
+        fgets(line,sizeof(line) - 1,stdin);
 
-        int r{ DivideByChar(buf, ' ', arg, 2,BUF_SIZE) };
+        line[strlen(line) - 1] = 0;
 
-        cout << line[0] << endl;
+        *arg[0] = 0;
+        *arg[1] = 0;
 
+        if (*line){
+
+            int r{ DivideByChar(line, ' ', arg, 2,BUF_SIZE) };
+
+            for (size_t i {}; ((i < DIM(g_handler)) && r > 0); i++){
+
+                if (strcmp(g_handler[i].cmd,arg[0]) == 0){
+                    g_handler[i].handler(arg[1]);
+                    break;
+                }
+                
+            }
+            
+            // std::cout << "arg[0] = " << arg[0] << std::endl;
+            // std::cout << "arg[1] = " << arg[1] << std::endl;
+        }
     }
 
-    Free2d(line);
+    Free2d(arg);
 
     return 0;
 }
