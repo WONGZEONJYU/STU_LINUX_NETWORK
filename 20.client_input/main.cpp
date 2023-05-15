@@ -12,15 +12,15 @@ using namespace std;
 #define BUF_SIZE   64
 #define DIM(a)     sizeof(a)/sizeof(*a)
 
-static char * Query_Handler(const char * cmd)
+static char * Query_Handler(const char * arg)
 {
-    cout << "Query_Handler :" << cmd << endl;
+    cout << __FUNCTION__ << " : " << arg << endl;
     return nullptr;
 }
 
-static char * Touch_Handler(const char * cmd)
+static char * Touch_Handler(const char * arg)
 {
-    cout << "Touch_Handler :" << cmd << endl;
+    cout << __FUNCTION__ << " : " << arg << endl;
     return nullptr;
 }
 
@@ -37,42 +37,39 @@ static Handler g_handler[] {
 
 int main(int argc, char const *argv[])
 {
-    cout << "test main " << endl;
+    // cout << "test main " << endl;
 
-    char line[BUF_SIZE]{};
+    // char line[BUF_SIZE]{};
 
-    char ** arg {Malloc2d<char>(2, BUF_SIZE)};
+    // char ** arg { Malloc2d<char>(2, BUF_SIZE) };
 
-    while (arg){
+    // while (arg){
 
-        cout << "Input >>> ";
+    //     cout << "Input >>> ";
 
-        fgets(line,sizeof(line) - 1,stdin);
+    //     fgets(line,sizeof(line) - 1,stdin);
 
-        line[strlen(line) - 1] = 0;
+    //     line[strlen(line) - 1] = 0;
 
-        *arg[0] = 0;
-        *arg[1] = 0;
+    //     *arg[0] = 0;
+    //     *arg[1] = 0;
 
-        if (*line){
+    //     if (*line){
 
-            int r{ DivideByChar(line, ' ', arg, 2,BUF_SIZE) };
+    //         int r{ DivideByChar(line, ' ', arg, 2,BUF_SIZE) };
 
-            for (size_t i {}; ((i < DIM(g_handler)) && r > 0); i++){
+    //         for (size_t i {}; ((i < DIM(g_handler)) && r > 0); i++){
 
-                if (strcmp(g_handler[i].cmd,arg[0]) == 0){
-                    g_handler[i].handler(arg[1]);
-                    break;
-                }
-                
-            }
-            
-            // std::cout << "arg[0] = " << arg[0] << std::endl;
-            // std::cout << "arg[1] = " << arg[1] << std::endl;
-        }
-    }
+    //             if (strcmp(g_handler[i].cmd,arg[0]) == 0){
+    //                 g_handler[i].handler(arg[1]);
+    //                 break;
+    //             }
 
-    Free2d(arg);
+    //         }
+    //     }
+    // }
+
+    // Free2d(arg);
 
     return 0;
 }

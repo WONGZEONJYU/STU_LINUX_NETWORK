@@ -88,9 +88,19 @@ int DivideByChar(const char* line, char c, char** argv, int row, int col)
             }
 
             free(buf);
-        } 
+        }
     }
-    
+
     return ret;
 }
 
+int CharCount(const char * s,char c)
+{
+    int ret {};
+
+    while (s && *s){
+        ret += (*s++ == c);
+    }
+
+    return ret;
+}

@@ -29,6 +29,7 @@ static inline T ** Malloc2d(int row, int col)
     return ret;
 }
 
+int CharCount(const char * s,char c);
 void Free2d(void* p);
 char* FormatByChar(const char* src, char c);
 int DivideByChar(const char* line, char c, char** argv, int row, int col);
