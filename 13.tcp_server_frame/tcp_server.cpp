@@ -194,6 +194,33 @@ void TcpServer_DoWork(TcpServer * server)
     }
 }
 
+TcpClient* TcpServer_Accept (TcpServer* server)
+{
+    Server * s {reinterpret_cast<Server *>(server)};
+
+    TcpClient * ret {};
+
+    if (s){
+
+        sockaddr_in caddr{};
+
+        socklen_t asize {sizeof(caddr)};
+
+        int fd {accept(s->fd,reinterpret_cast<sockaddr*>(&caddr),&asize)};
+
+        if (fd > -1){
+
+            ret = TcpClient_From(fd);
+
+            if (!ret){
+                close(fd);
+            }
+        }
+    }
+
+    return ret;
+}
+
 void TcpServer_Del(TcpServer * server)
 {
     TcpServer_Stop(server);

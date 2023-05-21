@@ -55,24 +55,46 @@ void EventListener(TcpClient * client,int evt){
 
 int main(int argc, char const *argv[])
 {
-    TcpServer * server {TcpServer_New()};
+    TcpServer * server { TcpServer_New() };
+    
+    // if (TcpServer_IsValid(server)){
 
-    if (server){
+    //     int r { TcpServer_Start(server,8888,20) };
 
-        int r { TcpServer_Start(server,8888,20) };
+    //     cout << "r = " << r << endl;
 
-        cout << "r = " << r << endl;
+    //     if (r)
+    //     {
+    //         TcpServer_SetListener(server,EventListener);
 
-        if (r)
-        {
-            TcpServer_SetListener(server,EventListener);
+    //         TcpServer_DoWork(server);
+    //     }
+   //         TcpServer_Del(server);
+    // }
 
-            TcpServer_DoWork(server);
+    TcpServer_Start(server,9000,100);
+
+    if (TcpServer_IsValid(server)){
+        
+        TcpClient * c {TcpServer_Accept(server)};
+
+        if (c){
+
+            char buf[64]{};
+
+            int len {TcpClient_RecvRaw(c,buf,sizeof(buf) - 1)};
+
+            buf[len] = 0;
+
+            std::cout << "recv = " << buf << std::endl;
+
+            TcpClient_SendRaw(c,buf,len);
+
+            TcpClient_Del(c);
         }
 
+        TcpServer_Del(server);
     }
-
-    TcpServer_Del(server);
-
+    
     return 0;
 }
