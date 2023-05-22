@@ -194,7 +194,7 @@ void TcpServer_DoWork(TcpServer * server)
     }
 }
 
-TcpClient* TcpServer_Accept (TcpServer* server)
+TcpClient* TcpServer_Accept(TcpServer* server)
 {
     Server * s {reinterpret_cast<Server *>(server)};
 
