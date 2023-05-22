@@ -39,7 +39,7 @@ int main()
     socklen_t len {sizeof(remote)};
 
     int brd {1};
-    setsockopt(server,SOL_SOCKET,SO_BROADCAST,&brd,sizeof(brd));
+    setsockopt(server,SOL_SOCKET,SO_BROADCAST,&brd,sizeof(brd));//socket广播设置
 
     char buf[32]{"WONGZEONJYU"};
     int r(strlen(buf));

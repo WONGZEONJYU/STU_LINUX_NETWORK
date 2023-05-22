@@ -27,6 +27,8 @@ int TcpServer_IsValid(TcpServer * server);    //检查服务端是否有效
 
 void TcpServer_DoWork(TcpServer * server);    //用于服务端工作
 
+TcpClient* TcpServer_Accept (TcpServer* server);
+
 void TcpServer_Del(TcpServer * server);    //销毁服务端
 
 int TcpServer_SetOpt(TcpServer * server,int level, int optname, const void* optval, unsigned int optlen);
