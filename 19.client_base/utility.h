@@ -3,6 +3,8 @@
 
 #include <cstdlib>
 
+#define DIM(a)  (sizeof(a))/(sizeof(*a))
+
 template<typename T> 
 static inline T ** Malloc2d(int row, int col)
 {
