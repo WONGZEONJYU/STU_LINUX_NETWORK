@@ -6,6 +6,8 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+using namespace std;
+
 void func1()
 {
     DIR * dirp {opendir(".")};
@@ -64,6 +66,10 @@ int main(int argc, const char** argv)
 
     //func1();
     //file_copy("new.out","a.out");
+    cout << "argc : " << argc << endl;
+    cout << "argv[0] :" << argv[0] << endl;
+    cout << "argv[1] :" << argv[1] << endl;
+
     return 0;
 }
 

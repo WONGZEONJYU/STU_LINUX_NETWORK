@@ -85,7 +85,7 @@ Message * MParser_ReadMem(MParser * parser,unsigned char * mem,unsigned int leng
     Message * ret {};
 
     if (p && mem){
-        
+
         if (!p->header){    //解析数据头
 
             int len ( (p->need < length) ? p->need : length );  //取最小值，内存中的数据长度不一定达到协议数据头所需的字节数
@@ -163,7 +163,7 @@ Message * MParser_ReadFd(MParser * parser,int fd)
             }
 
         }else{
-            
+
             if (p->msg){
 
                 const int offset (p->msg->length - p->need);
