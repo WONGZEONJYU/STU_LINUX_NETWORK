@@ -21,11 +21,69 @@ struct Handler{
     void(*handler)(const char *);
 };
 
+enum {
+    STOP,
+    RUN,
+    PAUSE,
+};
+
 static volatile const char *g_root {};
+static volatile int g_status {};
+
+static void DoResp(void * arg)
+{
+    cout << __FUNCTION__ << " : " << arg << endl;
+}
+
+static void *Client_Thread(void * arg)
+{
+    while (TcpClient_IsValid(arg)){
+        DoResp(arg);
+    }
+
+    return arg;
+}
+
+static void * Server_Thread(void * arg)
+{
+    cout << __FUNCTION__ << " : " << arg << endl;
+
+    while (TcpServer_IsValid(arg)){
+
+        TcpClient * client {TcpServer_Accept(arg)};
+
+        cout << __FUNCTION__ << " : " <<  client << endl;
+
+        if (client && (PAUSE != g_status)){
+
+            pthread_t tid {};
+            pthread_create(&tid,nullptr,Client_Thread,client);
+
+        }else {
+            TcpClient_Del(client);
+        }
+    }
+
+    return arg;
+}
 
 static void Start_Handler(const char *arg)
 {
+    int err {};
 
+    if (STOP == g_status){
+
+        TcpServer * server {TcpServer_New()};
+
+        TcpServer_Start(server,9000,100);
+
+        if (TcpServer_IsValid(server)){
+
+            pthread_t tid {};
+            err = pthread_create(&tid,nullptr,Server_Thread,server);
+            cout << "err = " << err << endl;
+        }
+    }
 }
 
 static void Pause_Handler(const char *arg)
@@ -89,7 +147,6 @@ static void Run(const char *root)
     }
 }
 
-
 int main(int argc, char const **argv)
 {
     if (argc >= 2){
@@ -103,7 +160,7 @@ int main(int argc, char const **argv)
         }
     }
 
-    std::cout << "dir error" << std::endl;
+    std::cout << "opendir error" << std::endl;
 
     return 0;
 }
