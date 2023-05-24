@@ -12,7 +12,7 @@ struct MsgParser
     Message cache;      //缓存已解析的消息头
 };
 
-static void InitState(MsgParser * p)
+static inline void InitState(MsgParser * p)
 {
     p->header = 0;
     p->need = sizeof(p->cache);
@@ -31,7 +31,7 @@ static int ToMidState(MsgParser * p)
     return !!p->msg;
 }
 
-static Message * ToLastState(MsgParser * p)
+static inline Message *ToLastState(MsgParser * p)
 {
     Message * ret {};
 
