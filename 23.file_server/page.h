@@ -11,7 +11,7 @@ struct RowInfo
 
 char* ToPageString(const char* path,const char* ts);
 Table* CreatTable();
-Table* InsterRow(Table *table,RowInfo *info);
+Table* InsertRow(Table *table,RowInfo *info);
 char* ToTableString(Table *table);
 void FreeTable(Table *table);
 
