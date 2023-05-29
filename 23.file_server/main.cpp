@@ -12,6 +12,7 @@
 #include "tcp_server.h"
 #include "udp_point.h"
 #include "utility.h"
+#include "page.h"
 
 #define BUF_SIZE 512
 
@@ -202,6 +203,26 @@ static void Run(const char *root)
 
 int main(int argc, char const **argv)
 {
+    Table * t {CreatTable()};
+    RowInfo r1 {"aaa","bbbbb","cccc","dddd","eeeee"};
+    RowInfo r2 {"111","22222","3333","4444","55555"};
+
+    t = InsertRow(t,&r1);
+    t = InsertRow(t,&r2);
+
+    char *ts {ToTableString(t)};
+
+    char* page {ToPageString("test/path/folder",ts)};
+
+    std::cout << page << std::endl;
+
+    free(page);
+    free(ts);
+    FreeTable(t);
+
+    getchar();
+    return 0;
+
     if (argc >= 2){
         
         DIR * dir {opendir(argv[1])};
@@ -217,3 +238,5 @@ int main(int argc, char const **argv)
 
     return 0;
 }
+
+
