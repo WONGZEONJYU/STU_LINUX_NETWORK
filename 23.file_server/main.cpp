@@ -13,6 +13,7 @@
 #include "udp_point.h"
 #include "utility.h"
 #include "page.h"
+#include "response.h"
 
 #define BUF_SIZE 512
 
@@ -203,24 +204,25 @@ static void Run(const char *root)
 
 int main(int argc, char const **argv)
 {
-    Table * t {CreatTable()};
-    RowInfo r1 {"aaa","bbbbb","cccc","dddd","eeeee"};
-    RowInfo r2 {"111","22222","3333","4444","55555"};
+    // Table * t {CreatTable()};
+    // RowInfo r1 {"aaa","bbbbb","cccc","dddd","eeeee"};
+    // RowInfo r2 {"111","22222","3333","4444","55555"};
 
-    t = InsertRow(t,&r1);
-    t = InsertRow(t,&r2);
+    // t = InsertRow(t,&r1);
+    // t = InsertRow(t,&r2);
 
-    char *ts {ToTableString(t)};
+    // char *ts {ToTableString(t)};
 
-    char* page {ToPageString("test/path/folder",ts)};
+    // char* page {ToPageString("test/path/folder",ts)};
 
-    std::cout << page << std::endl;
+    // std::cout << page << std::endl;
 
-    free(page);
-    free(ts);
-    FreeTable(t);
-
-    getchar();
+    // free(page);
+    // free(ts);
+    // FreeTable(t);
+    RequestHandler(0,0,0);
+    // getchar();
+    
     return 0;
 
     if (argc >= 2){

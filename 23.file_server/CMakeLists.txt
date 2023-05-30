@@ -27,6 +27,9 @@ include_directories(../19.client_base/)
 add_executable(file_server 
             main.cpp
             page.cpp
+            page.h
+            response.cpp
+            response.h
             ../11.msg_parser/message.cpp 
             ../11.msg_parser/msg_parser.cpp
             ../12.tcp_client_frame/tcp_client.cpp

@@ -18,7 +18,7 @@ void func1()
 
         while ((dp = readdir64(dirp))){
 
-            struct stat64 sb64 {}; 
+            struct stat64 sb64 {};
             if (stat64(dp->d_name,&sb64) != -1){
 
                 std::cout << "name:"<< dp->d_name << " type:" << std::hex << static_cast<int>(dp->d_type)
