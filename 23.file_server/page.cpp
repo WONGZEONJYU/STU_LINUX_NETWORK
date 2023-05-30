@@ -83,6 +83,7 @@ Table* InsertRow(Table *table,RowInfo *info)
 
             ret = t;
         }
+
         free(buf);
     }
 
