@@ -11,8 +11,7 @@
 #include "page.h"
 #include "response.h"
 
-enum{   TypeAll = 0x00,TypeDir = 0x04,TypeFile = 0x08   };
-
+enum{ TypeAll = 0x00,TypeDir = 0x04,TypeFile = 0x08 };
 struct FileEntry
 {
     const int length;
@@ -92,23 +91,97 @@ static int GetEntryCount(const char* path)
     return ret;
 }
 
+static FileEntry* GetEntry(const char* req, const char* root, int type)
+{
+    FileEntry * ret {};
+
+
+
+
+    return ret;
+}
+
+static char* MakeHTML(const char* req, const char* root)
+{
+    char* ret{};
+
+    Table* table {CreatTable()};
+
+    if (table){
+
+        RowInfo* back {};
+
+        if ( (strcmp(req,"/") != 0) && (back = reinterpret_cast<RowInfo*>(calloc(1,sizeof(*back)))) ){
+            
+            int i (strlen(req) - 1);
+
+            strcpy(back->link,req);
+
+            while ('/' != back->link[i]) {
+                --i;
+            }
+
+            i ? (back->link[i] = 0) : (back->link[i + 1] = 0);
+            /*
+                such as : req = "/abc/de" ===> parent folder "/abc"
+                such as : req = "/abc" ===> parent folder = "/"
+            */
+           strcpy(back->name,"./..");
+           strcpy(back->type,"Back..");
+           table = InsertRow(table,back);
+        }
+
+        free(back);
+
+        FileEntry* fe {GetEntry(req,root, TypeDir)};
+  
+        for (int i {}; (fe) && (i < fe->length); i++){
+
+            table = InsertRow(table,&fe->data[i]);
+        }
+
+        free(fe);
+
+        fe = GetEntry(req,root, TypeFile);
+
+        for (int i {}; (fe) && (i < fe->length); i++){
+
+            table = InsertRow(table,&fe->data[i]);
+        }
+
+        free(fe);
+
+        char* ts{ToTableString(table)};
+
+        ret = ts ? ToPageString(req,ts) : nullptr;
+
+        free(ts);
+    }
+
+    FreeTable(table);
+
+    return ret;
+}
+
 int RequestHandler(TcpClient* client,const char* req,const char* root)
 {
     int ret {};
 
-    // if (client && req && root){
-        
-    // }
+    // char* ap { GetAbsPath("cd/e","/a/b") };
 
-    char* ap {GetAbsPath("cd/e","/a/b")};
-
-    std::cout <<"ap = " << ap << std::endl;
+    // std::cout <<"ap = " << ap << std::endl;
     
-    std::cout <<". = " << IsDotPath(".") << std::endl;
-    std::cout <<".. = " << IsDotPath("..") << std::endl;
-    std::cout <<"/a/b = " << IsDotPath("/a/b") << std::endl;
+    // std::cout <<". = " << IsDotPath(".") << std::endl;
+    // std::cout <<".. = " << IsDotPath("..") << std::endl;
+    // std::cout <<"/a/b = " << IsDotPath("/a/b") << std::endl;
 
-    std::cout << GetEntryCount("/home/wong/STU_LINUX_NETWORK/23.file_server/build") << std::endl;
+    // std::cout << GetEntryCount("/home/wong/STU_LINUX_NETWORK/23.file_server/build") << std::endl;
+
+    // free(ap);
+
+    char* ap{MakeHTML("/home/wong", "/home/wong/STU_LINUX_NETWORK/23.file_server/build")};
+
+    std::cout << "ap = " << ap << std::endl;
 
     free(ap);
 
