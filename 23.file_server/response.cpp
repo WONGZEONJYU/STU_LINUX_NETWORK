@@ -91,12 +91,74 @@ static int GetEntryCount(const char* path)
     return ret;
 }
 
-static FileEntry* GetEntry(const char* req, const char* root, int type)
+static void SortFileEntry(FileEntry* fe)
 {
-    FileEntry * ret {};
+    RowInfo* temp {reinterpret_cast<RowInfo*>(malloc(sizeof(*temp)))};
+
+    if (fe && temp){
+
+        for (int i {}; i < fe->length; i++){
+            
+
+        }
+        
+    }
+    
+    free(temp);
+}
+
+
+static int MakeEntryItem(RowInfo* info,dirent* dp,const char* ap,const char* req)
+{
+    int ret {};
 
 
 
+    return ret;
+}
+
+static FileEntry* GetEntry(const char* req, const char* root, const int type)
+{
+    char* ap {GetAbsPath(req,root)};
+    DIR* dirp {};
+    FileEntry* ret {};
+
+    if (ap && (dirp = opendir(ap))){
+        
+        int* pLen{};
+        ret = reinterpret_cast<FileEntry*>(malloc(sizeof(*ret)));
+
+        if (ret){
+            
+            pLen = const_cast<int*>(&ret->length);
+            *pLen = 0;
+        }
+
+        dirent* dp{};
+        int max{};
+        constexpr int STEP {5};
+        while (pLen && (dp = readdir(dirp))){
+
+            if (*pLen == max){
+
+                max += STEP;
+                ret = reinterpret_cast<FileEntry*>(realloc(ret,sizeof(*ret) + sizeof(RowInfo) * max));
+                pLen = const_cast<int*>(&ret->length);
+            }
+            
+            if (ret && ( (TypeAll == type) || (type == dp->d_type) )){
+                
+                if ((!IsDotPath(dp->d_name)) && MakeEntryItem(&ret->data[*pLen],dp,ap,req)){
+                    *pLen += 1;
+                }
+            }
+        }
+
+        
+    }
+
+    free(ap);
+    closedir(dirp);
 
     return ret;
 }
