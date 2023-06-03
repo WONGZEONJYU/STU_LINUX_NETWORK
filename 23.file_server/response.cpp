@@ -291,9 +291,9 @@ int RequestHandler(TcpClient* client,const char* req,const char* root)
 
     // free(ap);
 
-    char* ap{MakeHTML("/home/wong", "/home/wong/STU_LINUX_NETWORK/23.file_server/build")};
+    char* ap{MakeHTML("/CMakeFiles", "/home/wong/STU_LINUX_NETWORK/23.file_server/build")};
 
-    std::cout << "ap = " << ap << std::endl;
+    std::cout << ap << std::endl;
 
     free(ap);
 
