@@ -19,18 +19,11 @@ struct FileEntry
     RowInfo data[];
 };
 
-static const char* HTTP_FORMAT {
-    "HTTP:/1.1 200 OK\r\n"
-    "Server:Test Http Server\r\n"
-    "Content-Length:%d\r\n"
-    "Content-Type:text/html\r\n"
-    "Connection:close\r\n\r\n"
-};
-
+/*通过请求路径和根路径拼接成绝对路径*/
 static char* GetAbsPath(const char* relative,const char* root)
 {
-    int reLen (strlen(relative));
-    int rootLen (strlen(root));
+    const int reLen (strlen(relative));
+    const int rootLen (strlen(root));
 
     char *ret {reinterpret_cast<char*>(malloc(reLen + rootLen + 2))};
 
@@ -41,14 +34,18 @@ static char* GetAbsPath(const char* relative,const char* root)
         if ( ('/' == relative[0]) && ('/' == ret[rootLen - 1]) ){
             ret[rootLen - 1] = 0;
             /*
-            如果请求路径的头部存在分隔符'/'和根目录路径最后也存在一个分隔符'/'
+            如果请求路径的头部存在分隔符'/'和根目录路径尾部也存在一个分隔符'/',则删除根目录尾部分隔符"/",再进行拼接
             such as: root = "/root/"  relative = "/file" ===> /root/ + /file ===>
                 /root + /file ==> /root/file
             */
         }
 
         if( ('/' != relative[0]) && ('/' != ret[rootLen - 1]) ){
-            //如果请求路径和根目录路径都没有'/'分隔符
+            /*
+                如果请求路径头部和根目录路径尾部都没有'/'分隔符,则在根目录后面加上"/"，再进行拼接
+                such as: root = "/root" relative = "folder" ===> /root + folder ===> /root + /folder
+                ===>    /root/folder
+            */
             strcat(ret,"/");
         }
 
@@ -58,6 +55,7 @@ static char* GetAbsPath(const char* relative,const char* root)
     return ret;
 }
 
+/*判断路径是否为"." 或者 ".." ,yes return 1 , no return 0 , error return -1 */
 static int IsDotPath(const char* path)
 {
     int ret {-1};
@@ -69,6 +67,7 @@ static int IsDotPath(const char* path)
     return ret;
 }
 
+/*获取文件和文件夹的个数，除了"." , ".." 以外的个数*/
 static int GetEntryCount(const char* path)
 {
     int ret {-1};
@@ -77,9 +76,8 @@ static int GetEntryCount(const char* path)
 
     if (dirp){
 
-        dirent * dp {};
         ret = 0;
-        while (dp = readdir(dirp)){
+        while (dirent *dp {readdir(dirp)}){
 
             if (!IsDotPath(dp->d_name)){
                 ++ret;
@@ -92,6 +90,7 @@ static int GetEntryCount(const char* path)
     return ret;
 }
 
+/*对文件和文件夹按名字进行从小到大的排序,*/
 static void SortFileEntry(FileEntry* fe)
 {
     RowInfo* temp {};
@@ -118,6 +117,7 @@ static void SortFileEntry(FileEntry* fe)
     free(temp);
 }
 
+/*根据dp所指向的 (文件 和 文件夹) 生成RowInfo数据结构，成功返回true，失败返回false*/
 static int MakeEntryItem(RowInfo* item,dirent* dp,const char* ap,const char* req)
 {
     int ret {};
@@ -129,29 +129,33 @@ static int MakeEntryItem(RowInfo* item,dirent* dp,const char* ap,const char* req
         strcpy(item->link,req);
         (strcmp(req,"/") != 0) ? strcat(item->link,"/") : 0;
         strcat(item->link,dp->d_name);
-        
+
         strcpy(item->name,dp->d_name);
-        
+
         {
             char buf[32]{};
 
             if (TypeFile == dp->d_type){
+
                 strcpy(item->type,"File");
-                if (sb.st_size < 1024){ //bytes
+                if (sb.st_size < 1024){                     //bytes
                     sprintf(buf,"%ld",sb.st_size);
                     strcpy(item->size,buf);
                     strcat(item->size," KB");
 
-                }else if((sb.st_size / 1024) < 1024) {   //kbytes
+                }else if((sb.st_size / 1024) < 1024) {      //kbytes
+
                     sprintf(buf,"%ld",sb.st_size / 1024);
                     strcpy(item->size,buf);
                     strcat(item->size," kB");
-                }else{  //Mbytes
+                }else{                                      //Mbytes
+
                     sprintf(buf,"%ld",sb.st_size / 1024 / 1024);
                     strcpy(item->size,buf);
                     strcat(item->size," MB");
                 }
             }else{
+
                 strcpy(item->type,"Folder");
                 sprintf(buf,"%d",GetEntryCount(path));
                 strcpy(item->size,buf);
@@ -167,6 +171,7 @@ static int MakeEntryItem(RowInfo* item,dirent* dp,const char* ap,const char* req
     return ret;
 }
 
+/* 获取root/req 路径下 (文件 和 文件夹) 所对应的RowInfo数组，返回值需释放 (free) */
 static FileEntry* GetEntry(const char* req, const char* root, const int type)
 {
     char* ap {GetAbsPath(req,root)};
@@ -213,6 +218,7 @@ static FileEntry* GetEntry(const char* req, const char* root, const int type)
     return ret;
 }
 
+/*创建root/req 路径下 (文件 和 文件夹) 所构成的 HTML 页面，返回值需释放 (free）*/
 static char* MakeHTML(const char* req, const char* root)
 {
     char* ret{};
@@ -275,9 +281,49 @@ static char* MakeHTML(const char* req, const char* root)
     return ret;
 }
 
+static int Response(TcpClient* client,const char* html)
+{
+    const char* HTTP_FORMAT {
+        "HTTP:/1.1 200 OK\r\n"
+        "Server:Test Http Server\r\n"
+        "Content-Length:%d\r\n"
+        "Content-Type:text/html\r\n"
+        "Connection:close\r\n\r\n"
+        "%s"
+    };
+
+    int ret {};
+
+    if (html){
+        
+        const size_t html_size {strlen(html)};
+
+        char* resp {reinterpret_cast<char*>(malloc(strlen(HTTP_FORMAT) + html_size + 16))};
+
+        if (resp){
+
+            sprintf(resp,HTTP_FORMAT,html_size,html);
+
+            ret = (TcpClient_SendRaw(client,resp,strlen(resp)) > 0);
+        }
+
+        free(resp);
+    }
+
+    return ret;
+}
+
+static int DirReqHandler(TcpClient* client,const char* req,const char* root)
+{
+    char* html { MakeHTML(req,root) };
+    int ret { Response(client,html) };
+    free(html);
+    return ret;
+}
+
 int RequestHandler(TcpClient* client,const char* req,const char* root)
 {
-    int ret {};
+    // int ret {};
 
     // char* ap { GetAbsPath("cd/e","/a/b") };
 
@@ -291,11 +337,13 @@ int RequestHandler(TcpClient* client,const char* req,const char* root)
 
     // free(ap);
 
-    char* ap{MakeHTML("/CMakeFiles", "/home/wong/STU_LINUX_NETWORK/23.file_server/build")};
+    // char* ap{MakeHTML("/CMakeFiles", "/home/wong/STU_LINUX_NETWORK/23.file_server/build")};
 
-    std::cout << ap << std::endl;
+    // std::cout << ap << std::endl;
 
-    free(ap);
+    // free(ap);
+
+    int ret {DirReqHandler(client,req,root)};
 
     return ret;
 }

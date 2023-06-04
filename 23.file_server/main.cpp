@@ -24,48 +24,37 @@ struct Handler{
 };
 
 enum {
-    STOP,
-    RUN,
-    PAUSE,
+    STOP,RUN,PAUSE,
 };
 
 static volatile const char *g_root {};
 static volatile int g_status {};
 
-static void DoResp(TcpClient * client)
+static void DoResp(TcpClient* client)
 {
     int len {TcpClient_Available(client)};
 
     if (len > 0){
 
-        char * buf {reinterpret_cast<char*>(malloc(len + 1))};
+        char* buf {reinterpret_cast<char*>(malloc(len + 1))};
+        char* req {reinterpret_cast<char*>(malloc(2048))}; 
 
-        TcpClient_RecvRaw(client,buf,len);
+        if (buf && req){
 
-        buf[len] = 0;
+            TcpClient_RecvRaw(client,buf,len);
 
-        cout << __FUNCTION__  << " - Request buf : " << buf << endl;
+            buf[len] = 0;
 
-        char resp[255] {};
+            sscanf(buf,"GET %s HTTP",req);
 
-        sscanf(buf,"GET %s HTTP",resp);
+            std::cout << "Request: " << req << std::endl;
 
-        std::cout << __FUNCTION__ <<" - Req String :" << resp << std::endl;
+            RequestHandler(client,req,const_cast<const char*>(g_root));
 
-        const char *format {"HTTP/1.1 200 OK\r\n"
-                        "Server:W.Z.J Http Server\r\n"
-                        "Connect-Length:%d\r\n"
-                        "Connect-Type:text/html\r\n"
-                        "Connection:close\r\n"
-                        "\r\n"
-                        "%s"};
-
-        sprintf(resp,format,strlen((const char *)g_root),g_root);
+        }
         
-        TcpClient_SendRaw(client,resp,strlen(resp));
-
-        TcpClient_Close(client);
-
+        TcpClient_Del(client);
+        free(req);
         free(buf);
     }
 }
@@ -85,7 +74,7 @@ static void * Server_Thread(void * arg)
 {
     while (TcpServer_IsValid(arg)){
 
-        TcpClient * client {TcpServer_Accept(arg)};
+        TcpClient* client {TcpServer_Accept(arg)};
 
         if (client && (PAUSE != g_status)){
 
@@ -115,12 +104,10 @@ static void Start_Handler(const char *arg)
         TcpServer_Start(server,9000,100);
 
         if (TcpServer_IsValid(server)){
-
             pthread_t tid {};
             err = pthread_create(&tid,nullptr,Server_Thread,server);
 
         }else {
-
             err = 1;
         }
     }
@@ -220,10 +207,9 @@ int main(int argc, char const **argv)
     // free(page);
     // free(ts);
     // FreeTable(t);
-    RequestHandler(0,0,0);
-    // getchar();
-    
-    return 0;
+    //RequestHandler(0,0,0);
+    // getchar();    
+    //return 0;
 
     if (argc >= 2){
         
