@@ -99,11 +99,8 @@ static void SortFileEntry(FileEntry* fe)
 
         for (int i {}; i < fe->length; i++){
             
-
         }
-        
     }
-    
     free(temp);
 }
 
