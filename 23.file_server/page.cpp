@@ -29,7 +29,7 @@ static const char *TABLE_TITLE {
 
 static const char * ROW_FORMAT {
 "<tr>"
-"    <td><a href = \"%s\"></a>%s</td><td>%s</td><td>%s</td><td>%s</td>"
+    "   <td><a href=\"%s\">%s</a></td><td>%s</td><td>%s</td><td>%s</td>"
 "</tr>"
 };
 

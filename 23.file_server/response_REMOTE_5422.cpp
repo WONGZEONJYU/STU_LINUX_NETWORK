@@ -100,10 +100,6 @@ static void SortFileEntry(FileEntry* fe)
 
         for (int i {}; i < fe->length; i++){
             
-<<<<<<< HEAD
-        }
-    }
-=======
             int min {i};
 
             for (int j {i};j < fe->length;++j){
@@ -119,7 +115,6 @@ static void SortFileEntry(FileEntry* fe)
         }
     }
 
->>>>>>> 7e14c9138c050ccf3761c3b89f177fe85bf1597e
     free(temp);
 }
 

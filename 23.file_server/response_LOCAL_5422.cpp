@@ -12,7 +12,6 @@
 #include "response.h"
 
 enum{ TypeAll = 0x00,TypeDir = 0x04,TypeFile = 0x08 };
-
 struct FileEntry
 {
     const int length;
@@ -76,7 +75,7 @@ static int GetEntryCount(const char* path)
     DIR * dirp {opendir(path)};
 
     if (dirp){
-
+        
         dirent * dp {};
         ret = 0;
         while (dp = readdir(dirp)){
@@ -94,80 +93,23 @@ static int GetEntryCount(const char* path)
 
 static void SortFileEntry(FileEntry* fe)
 {
-    RowInfo* temp {};
+    RowInfo* temp {reinterpret_cast<RowInfo*>(malloc(sizeof(*temp)))};
 
-    if (fe && (temp = reinterpret_cast<RowInfo*>(malloc(sizeof(*temp))))){
+    if (fe && temp){
 
         for (int i {}; i < fe->length; i++){
             
-<<<<<<< HEAD
         }
     }
-=======
-            int min {i};
-
-            for (int j {i};j < fe->length;++j){
-
-                if (strcmp(fe->data[min].name,fe->data[j].name) > 0){
-                    min = j;
-                }
-            }
-
-            *temp = fe->data[i];
-            fe->data[i] = fe->data[min];
-            fe->data[min] = *temp;
-        }
-    }
-
->>>>>>> 7e14c9138c050ccf3761c3b89f177fe85bf1597e
     free(temp);
 }
 
-static int MakeEntryItem(RowInfo* item,dirent* dp,const char* ap,const char* req)
+
+static int MakeEntryItem(RowInfo* info,dirent* dp,const char* ap,const char* req)
 {
     int ret {};
-    char *path {GetAbsPath(dp->d_name,ap)};
-    struct stat sb{};
 
-    if (path && (ret = (stat(path,&sb) != -1))){
 
-        strcpy(item->link,req);
-        (strcmp(req,"/") != 0) ? strcat(item->link,"/") : 0;
-        strcat(item->link,dp->d_name);
-        
-        strcpy(item->name,dp->d_name);
-        
-        {
-            char buf[32]{};
-
-            if (TypeFile == dp->d_type){
-                strcpy(item->type,"File");
-                if (sb.st_size < 1024){ //bytes
-                    sprintf(buf,"%ld",sb.st_size);
-                    strcpy(item->size,buf);
-                    strcat(item->size," KB");
-
-                }else if((sb.st_size / 1024) < 1024) {   //kbytes
-                    sprintf(buf,"%ld",sb.st_size / 1024);
-                    strcpy(item->size,buf);
-                    strcat(item->size," kB");
-                }else{  //Mbytes
-                    sprintf(buf,"%ld",sb.st_size / 1024 / 1024);
-                    strcpy(item->size,buf);
-                    strcat(item->size," MB");
-                }
-            }else{
-                strcpy(item->type,"Folder");
-                sprintf(buf,"%d",GetEntryCount(path));
-                strcpy(item->size,buf);
-                strcat(item->size," Item");
-            }
-        }
-
-        strcpy(item->time,ctime(&sb.st_mtime));
-    }
-
-    free(path);
 
     return ret;
 }
@@ -204,12 +146,12 @@ static FileEntry* GetEntry(const char* req, const char* root, const int type)
             if (ret && ( (TypeAll == type) || (type == dp->d_type) )){
                 
                 if ((!IsDotPath(dp->d_name)) && MakeEntryItem(&ret->data[*pLen],dp,ap,req)){
-                    ++(*pLen);
+                    *pLen += 1;
                 }
             }
         }
 
-        SortFileEntry(ret);
+        
     }
 
     free(ap);
@@ -296,9 +238,9 @@ int RequestHandler(TcpClient* client,const char* req,const char* root)
 
     // free(ap);
 
-    char* ap{MakeHTML("/CMakeFiles", "/home/wong/STU_LINUX_NETWORK/23.file_server/build")};
+    char* ap{MakeHTML("/home/wong", "/home/wong/STU_LINUX_NETWORK/23.file_server/build")};
 
-    std::cout << ap << std::endl;
+    std::cout << "ap = " << ap << std::endl;
 
     free(ap);
 
