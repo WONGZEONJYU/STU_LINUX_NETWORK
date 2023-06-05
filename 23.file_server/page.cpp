@@ -3,7 +3,7 @@
 #include <cstring>
 #include "page.h"
 
-static const char * PAGE_FORMAT {
+static const char* PAGE_FORMAT {
 "<!DOCTYPE html>"
 "<html>"
 "    <head>"
@@ -19,21 +19,37 @@ static const char * PAGE_FORMAT {
 "</html>"
 };
 
+static const char* ERR_FORMAT {
+"<!DOCTYPE html>"
+"<html>"
+"    <head>"
+"        <meta charset=\"utf-8\">"
+"        <title>回炉重学html</title>"
+"    </head>"
+"    <body>"
+"        <h1>WJZ Http File Server</h1>"
+"        <hr/>"
+"        <h2>00PS!!!</h2>"
+"        <h3>Path: \'%s\' is NOT available...</h3>"
+"    </body>"
+"</html>"
+};
+
 static const char* TABLE_BEGIN {"<table border = \"1\" width = \"100%\">"};
 
-static const char *TABLE_TITLE {
+static const char* TABLE_TITLE {
 "  <tr>"
 "    <th>File Name</th><th>File Type</th><th>File Size</th><th>Modify Time</th>"
 "  </tr>"
 };
 
-static const char * ROW_FORMAT {
+static const char* ROW_FORMAT {
 "<tr>"
     "   <td><a href=\"%s\">%s</a></td><td>%s</td><td>%s</td><td>%s</td>"
 "</tr>"
 };
 
-static const char * TABLE_END {
+static const char* TABLE_END {
 "   </tr>"
 "</table>"
 };
@@ -110,4 +126,15 @@ char* ToTableString(Table *table)
 void FreeTable(Table *table)
 {
     free(table);
+}
+
+char* ToErrString(const char* path)
+{
+    char* ret {};
+
+    if (path && (ret = reinterpret_cast<char*>(malloc(strlen(ERR_FORMAT) + strlen(path) + 1)))){
+        sprintf(ret,ERR_FORMAT,path);
+    }
+
+    return ret;
 }

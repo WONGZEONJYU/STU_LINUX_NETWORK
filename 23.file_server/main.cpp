@@ -45,6 +45,8 @@ static void DoResp(TcpClient* client)
 
             buf[len] = 0;
 
+            cout << __FUNCTION__ << buf << endl;
+
             sscanf(buf,"GET %s HTTP",req);
 
             std::cout << "Request: " << req << std::endl;
@@ -65,7 +67,7 @@ static void *Process_Thread(void * arg)
         DoResp(arg);
     }
 
-    cout << __FUNCTION__  << "  -  Thread Exit : " << arg << endl;
+    //cout << __FUNCTION__  << "  -  Thread Exit : " << arg << endl;
 
     return arg;
 }
@@ -226,5 +228,3 @@ int main(int argc, char const **argv)
 
     return 0;
 }
-
-
