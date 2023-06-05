@@ -9,6 +9,7 @@ struct RowInfo
     type[32],size[32],time[32];
 };
 
+char* ToErrString(const char* path);
 char* ToPageString(const char* path,const char* ts);
 Table* CreatTable();
 Table* InsertRow(Table *table,RowInfo *info);

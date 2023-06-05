@@ -75,10 +75,8 @@ static int GetEntryCount(const char* path)
     DIR * dirp {opendir(path)};
 
     if (dirp){
-
         ret = 0;
         while (dirent *dp {readdir(dirp)}){
-
             if (!IsDotPath(dp->d_name)){
                 ++ret;
             }
@@ -321,29 +319,75 @@ static int DirReqHandler(TcpClient* client,const char* req,const char* root)
     return ret;
 }
 
+static int BadReqHandler(TcpClient* client,const char* req,const char* root)
+{
+    char* html { ToErrString(req)};
+    int ret { Response(client,html) };
+    free(html);
+    return ret;
+}
+
+static int FileReqHandler(TcpClient* client,const char* req,const char* root)
+{
+    const char* HTTP_FORMAT {
+        "HTTP/1.1 200 OK\r\n"
+        "Server:Test Http Server\r\n"
+        "Content-Length:%d\r\n"
+        "Content-Type:application/*\r\n"
+        "Connection:close\r\n\r\n"
+    };
+
+    constexpr int BUF_SIZE {1024};
+
+    int ret {};
+    char* ap {GetAbsPath(req,root)};
+    const int fd {open(ap,O_RDONLY)};
+    char* head {reinterpret_cast<char*>(malloc(strlen(HTTP_FORMAT) + 32))};
+    char* buf {reinterpret_cast<char*>(malloc(BUF_SIZE))};
+
+    if (ap && head && buf && (-1 != fd)){
+
+        int max (lseek(fd,0,SEEK_END));
+
+        sprintf(head,HTTP_FORMAT,max);
+
+        int len {TcpClient_SendRaw(client,head,strlen(head))};
+
+        lseek(fd,0,SEEK_SET);
+
+        while ( (len > 0) && ((len = read(fd,buf,BUF_SIZE)) > 0) ){
+            ret += TcpClient_SendRaw(client,buf,len);
+        }
+        ret = (ret == max);
+    }
+
+    free(buf);
+    free(head);
+    free(ap);
+    close(fd);
+
+    return ret;
+}
+
 int RequestHandler(TcpClient* client,const char* req,const char* root)
 {
-    // int ret {};
+    int ret {};
 
-    // char* ap { GetAbsPath("cd/e","/a/b") };
+    if (client && req && root){
 
-    // std::cout <<"ap = " << ap << std::endl;
-    
-    // std::cout <<". = " << IsDotPath(".") << std::endl;
-    // std::cout <<".. = " << IsDotPath("..") << std::endl;
-    // std::cout <<"/a/b = " << IsDotPath("/a/b") << std::endl;
+        char* ap {GetAbsPath(req,root)};
 
-    // std::cout << GetEntryCount("/home/wong/STU_LINUX_NETWORK/23.file_server/build") << std::endl;
-
-    // free(ap);
-
-    // char* ap{MakeHTML("/CMakeFiles", "/home/wong/STU_LINUX_NETWORK/23.file_server/build")};
-
-    // std::cout << ap << std::endl;
-
-    // free(ap);
-
-    int ret {DirReqHandler(client,req,root)};
+        if ( ap && (0 == access(ap,F_OK)) ){
+            if (GetEntryCount(ap) < 0){
+                ret = FileReqHandler(client,req,root);
+            }else {
+                ret = DirReqHandler(client,req,root);
+            }
+        }else{
+            ret = BadReqHandler(client,req,root);
+        }
+        free(ap);
+    }
 
     return ret;
 }
