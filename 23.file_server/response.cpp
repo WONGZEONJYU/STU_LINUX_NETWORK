@@ -329,7 +329,7 @@ static int BadReqHandler(TcpClient* client,const char* req,const char* root)
 
 static int FileReqHandler(TcpClient* client,const char* req,const char* root)
 {
-    const char* HTTP_FORMAT {
+    constexpr char HTTP_FORMAT[] {
         "HTTP/1.1 200 OK\r\n"
         "Server:Test Http Server\r\n"
         "Content-Length:%d\r\n"

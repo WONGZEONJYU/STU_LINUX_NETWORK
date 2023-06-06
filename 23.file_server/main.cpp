@@ -67,8 +67,6 @@ static void *Process_Thread(void * arg)
         DoResp(arg);
     }
 
-    //cout << __FUNCTION__  << "  -  Thread Exit : " << arg << endl;
-
     return arg;
 }
 
@@ -89,8 +87,6 @@ static void * Server_Thread(void * arg)
     }
 
     g_status = STOP;
-
-    //cout << __FUNCTION__  << "  -  Thread Exit : " << arg << endl;
 
     return arg;
 }
@@ -126,9 +122,7 @@ static void Start_Handler(const char *arg)
 static void Pause_Handler(const char *arg)
 {
     if(RUN == g_status){
-
         g_status = PAUSE;
-
         std::cout << "Server is paused!" << std::endl;
     }else{
         std::cout << "Server is NOT started!" << std::endl;
@@ -193,26 +187,6 @@ static void Run(const char *root)
 
 int main(int argc, char const **argv)
 {
-    // Table * t {CreatTable()};
-    // RowInfo r1 {"aaa","bbbbb","cccc","dddd","eeeee"};
-    // RowInfo r2 {"111","22222","3333","4444","55555"};
-
-    // t = InsertRow(t,&r1);
-    // t = InsertRow(t,&r2);
-
-    // char *ts {ToTableString(t)};
-
-    // char* page {ToPageString("test/path/folder",ts)};
-
-    // std::cout << page << std::endl;
-
-    // free(page);
-    // free(ts);
-    // FreeTable(t);
-    //RequestHandler(0,0,0);
-    // getchar();    
-    //return 0;
-
     if (argc >= 2){
         
         DIR * dir {opendir(argv[1])};
@@ -225,6 +199,5 @@ int main(int argc, char const **argv)
     }
 
     std::cout << "opendir error" << std::endl;
-
     return 0;
 }
