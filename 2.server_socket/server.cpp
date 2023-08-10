@@ -11,7 +11,7 @@ using namespace std;
 
 int main() 
 {
-    int server {socket(PF_INET,SOCK_STREAM,0)};
+    int server { socket(PF_INET,SOCK_STREAM,0) };
 
     if (-1 == server){
         cout << "server socket error" << endl;
@@ -24,17 +24,16 @@ int main()
     saddr.sin_port = htons(8899);
 
     if (-1 == bind(server,reinterpret_cast<const sockaddr *>(&saddr),sizeof(saddr))){
-        cout << "server bind error" << endl;
+        cout << "server bind error\n";
+        return -1;
+    }
+
+    if (-1 == listen(server,1)){    /*每次只服务一个客户端*/
+        cout << "server listen error\n";
         return -1;
     }
     
-    if (-1 == listen(server,1))
-    {
-        cout << "server listen error" << endl;
-        return -1;
-    }
-    
-    cout << "server start success" << endl;
+    cout << "server start success\n";
     
     sockaddr_in caddr {};
     socklen_t asize {sizeof(caddr)};
@@ -42,19 +41,19 @@ int main()
     int client { accept(server,reinterpret_cast<sockaddr *>(&caddr),&asize) };
 
     if (-1 == client){
-        cout << "client accept success" << endl;
+        cout << "client accept error\n";
         return -1;
     }
 
-    cout << "client : " << client << endl;//client的数值表示系统资源的id
+    cout << "client : " << client << '\n';//client的数值表示系统资源的id
 
     int len {};
-
+    
     do{
 
         char buf[32]{};
 
-        int r ( recv(client,reinterpret_cast<void *>(buf),sizeof(buf)/sizeof(char),0) );
+        int r ( recv(client,reinterpret_cast<void *>(buf),sizeof(buf)/sizeof(*buf),0) );
 
         if (r > 0){
             len += r;
@@ -65,12 +64,10 @@ int main()
         }
 
     } while (len < 64);
-    
-    cout << endl;
 
-    cout << "recv len = " << len << endl;
+    cout << "\nrecv len = " << len << '\n';
 
-    const char temp_str[] {"Hello World!"};
+    constexpr char temp_str[] {"Hello World!"};
 
     send(client,temp_str,sizeof(temp_str),0);
 
