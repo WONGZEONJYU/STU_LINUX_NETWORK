@@ -12,30 +12,39 @@
 
 using namespace std;
 
-int server{-1};
+function<void(int,siginfo_t*,void*)> signal_func;
 
 void signal_handler(const int sig,siginfo_t *info, void*)
 {
-    constexpr char str[] {"exit\n"};
-    write(1,str,sizeof(str));
-    close(server);
-    exit(0);
+    signal_func(sig,info,nullptr);
 }
 
 int main(int argc,char* argv[])
 {
-    server = socket(PF_INET,SOCK_STREAM,0);
-
+    int server {socket(PF_INET,SOCK_STREAM,0)};
+    int client {-1};
+    
     if (-1 == server){
         cout << "server socket error\n";
         return -1;
     }
 
-    struct sigaction act{};
-    act.sa_flags = SA_RESTART | SA_SIGINFO ;
-    act.sa_sigaction = signal_handler;
+    {
+        /*此处跟网络无关,仅仅是为了ctrl+c终止程序销毁server,client*/
+        struct sigaction act{};
+        act.sa_flags = SA_RESTART | SA_SIGINFO ;
+        act.sa_sigaction = signal_handler;
 
-    sigaction(SIGINT,&act,nullptr);
+        signal_func = move([=](const int sig,siginfo_t* info,void*)mutable{
+            constexpr char str[] {"\nexit\n"};
+            write(1,str,sizeof(str));
+            close(client);
+            close(server);
+            exit(0);
+        });
+
+        sigaction(SIGINT,&act,nullptr);
+    }
 
     sockaddr_in saddr {};
     saddr.sin_family = AF_INET;
@@ -59,7 +68,7 @@ int main(int argc,char* argv[])
         sockaddr_in caddr {};
         socklen_t asize {sizeof(caddr)};
 
-        int client {accept(server,reinterpret_cast<sockaddr *>(&caddr),&asize)};
+        client = accept(server,reinterpret_cast<sockaddr *>(&caddr),&asize);
 
         if (-1 == client){
             cout << "client accept error\n";
