@@ -12,7 +12,7 @@
 
 using namespace std;
 
-function<void(int,siginfo_t*,void*)> signal_func;
+static function<void(int,siginfo_t*,void*)> signal_func;
 
 void signal_handler(const int sig,siginfo_t *info, void*)
 {
