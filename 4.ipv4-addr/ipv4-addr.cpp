@@ -9,29 +9,43 @@
 
 using namespace std;
 
-int main() 
+#define YES 1
+
+int main(int argc,char* argv[]) 
 {
-    unsigned int addr = inet_addr("1.2.3.4");
+#if 1
+    const unsigned int addr {inet_addr("1.2.3.4")};
+#else
+    const unsigned int addr {inet_addr("D.T.Software")};
+#endif
     in_addr addr1 {0x09080706};
     in_addr addr2 {0x05040302};
 
+#if YES
     char * s1 {strcpy(new char[32],inet_ntoa(addr1))};
     char * s2 {strcpy(new char[32],inet_ntoa(addr2))};
+#else
+    char* s1 {inet_ntoa(addr1)};
+    char* s2 {inet_ntoa(addr2)};
+#endif
 
-    std::cout << "addr1 = " << hex << addr1.s_addr << std::endl;
-    std::cout << "addr2 = " << hex << addr2.s_addr << std::endl;
+    cout << "s1 = " << s1 << '\n';
+    cout << "s2 = " << s2 << '\n';
 
-    std::cout << "s1 = " << s1 << std::endl;
-    std::cout << "s2 = " << s2 << std::endl;
+    cout << "addr = 0x" << hex << addr << '\n';
 
-    std::cout << "addr = " << hex << addr  << std::endl;
+    cout << "addr1 = 0x" << hex << addr1.s_addr << '\n';
+    cout << "addr2 = 0x" << hex << addr2.s_addr << '\n';
 
-    if (inet_aton("1.2.3.4",&addr1)){
-        std::cout << "addr1 = " << std::hex << addr1.s_addr << std::endl;
+    in_addr addr3 {};
+    if (inet_aton("1.2.3.4",&addr3)){
+        cout << "addr3 = 0x" << hex << addr3.s_addr << '\n';
     }
-    
+
+#if YES
     delete s1;
     delete s2;
+#endif
 
     return 0;
 }
