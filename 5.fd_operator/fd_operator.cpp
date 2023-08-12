@@ -16,7 +16,7 @@ int main()
 
     s[len] = 0;
 
-    std::cout << s << std::endl;
+    cout << "read : " << s << '\n';
 
     return 0;
 }
