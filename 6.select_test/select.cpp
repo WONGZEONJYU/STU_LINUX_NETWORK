@@ -6,13 +6,12 @@
 
 using namespace std;
 
-int main()
+int main(int argc,char* argv[])
 {
     int iofd {};
     char s[] {"Hello World!\r\n"};
     fd_set reads{};
-    fd_set temps{};
-    timeval timeout{};
+    
     FD_ZERO(&reads);
     FD_SET(iofd,&reads);
 
@@ -20,27 +19,25 @@ int main()
 
     while (true){
         
-        int r {-1};
-        
-        temps = reads;//select函数会影响temps的值，所以每次我们都需要拷贝一次以确保不会出错
+        fd_set temps{reads};//select函数会影响temps的值，所以每次我们都需要拷贝一次以确保不会出错
+        timeval timeout{.tv_sec = 0,.tv_usec = 50000};
 
-        timeout.tv_sec = 0;
-        timeout.tv_usec = 50000;
-
-        r = select(1,&temps,nullptr,nullptr,&timeout);
+        int r {select(1,&temps,nullptr,nullptr,&timeout)};
 
         if (r > 0){
-            int len (read(iofd,s,sizeof(s) -1));
+
+            cout << "r :" << r << '\n';
+
+            int len (read(iofd,s,(sizeof(s) - 1)));
 
             s[len] = 0;
 
-            std::cout << "Input: " << s << std::endl;
+            cout << "Input: " << s << '\n';
 
         }else if (0 == r){
-            usleep(10000);
-
+            usleep(1000);
             if (++counter > 100){
-                std::cout << "do something else" << std::endl;
+                cout << "do something else\n";
                 counter = 0;
             }
         }else{
