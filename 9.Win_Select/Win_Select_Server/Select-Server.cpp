@@ -5,14 +5,14 @@
 
 using namespace std;
 
-SOCKET server_handler(SOCKET server)
+SOCKET server_handler(const SOCKET server)
 {
     sockaddr_in addr{};
     int asize{ sizeof(addr) };
     return accept(server, reinterpret_cast<sockaddr*>(&addr), &asize);
 }
 
-int client_handler(SOCKET client)
+int client_handler(const SOCKET client)
 {
     char buf[32]{};
 
@@ -22,13 +22,12 @@ int client_handler(SOCKET client)
 
         buf[ret] = 0;
 
-        std::cout << "Receive :" << buf << std::endl;
+        std::cout << "Receive: " << buf << std::endl;
 
         if (strcmp(buf, "quit")) {
 
             ret = send(client, buf, ret,0);
-        }
-        else {
+        }else {
             ret = -1;
         }
     }
@@ -36,44 +35,40 @@ int client_handler(SOCKET client)
     return ret;
 }
 
-int main()
+int main(int argc,char* argv[])
 {
     WSADATA wd{};
 
     if (WSAStartup(MAKEWORD(2, 2), &wd)) {
-        cout << "startup error" << endl;
+        cout << "startup error\n";
         return -1;
     }
 
-    SOCKET server{ socket(PF_INET,SOCK_STREAM,IPPROTO_TCP) };
+    const SOCKET server{ socket(PF_INET , SOCK_STREAM ,IPPROTO_TCP) };
 
     if (INVALID_SOCKET == server) {
-        cout << "server socket error" << endl;
+        cout << "server socket error\n";
         return -1;
     }
 
     sockaddr_in saddr{};
-
     saddr.sin_family = AF_INET;
     saddr.sin_addr.s_addr = htonl(INADDR_ANY);//htonl函数把小端转换成大端（网络字节序采用大端）
     saddr.sin_port = htons(8888);
 
     if (SOCKET_ERROR == bind(server, reinterpret_cast<const sockaddr*>(&saddr), sizeof(saddr))) {
-        cout << "server bind error" << endl;
+        cout << "server bind error\n";
         return -1;
     }
 
     if (SOCKET_ERROR == listen(server, 1)) {
-        cout << "server listen error" << endl;
+        cout << "server listen error\n";
         return -1;
     }
 
-    cout << "server start success" << endl;
-    cout << "server socket_fd :" << server << endl;
+    cout << "server start success\n" << "server socket_fd :" << server << '\n';
 
     fd_set reads{};
-
-    //uint32_t max{ static_cast<uint32_t>(server)};
 
     FD_ZERO(&reads);
 
@@ -83,9 +78,7 @@ int main()
 
         fd_set temps{ reads };
 
-        timeval timeout{ 0,10000 };
-
-        //int num{ select((max + 1),&temps,nullptr,nullptr,&timeout) };
+        timeval timeout{ 0 ,10000 };
 
         int num{ select(0,&temps,nullptr,nullptr,&timeout) };
 
@@ -93,32 +86,28 @@ int main()
 
             for (uint32_t i{}; i < reads.fd_count; i++) {
 
-                SOCKET sock{ reads.fd_array[i] };
+                const SOCKET sock{ reads.fd_array[i] };
 
                 if (FD_ISSET(sock, &temps)) {
 
                     if (sock == server) {
 
-                        SOCKET client{ server_handler(sock) };
+                        const SOCKET client{ server_handler(sock) };
 
                         if (INVALID_SOCKET != client  ){
 
                             FD_SET(client, &reads);
-
-                            //max = ((client > max) ? client : max);
-
-                            std::cout << "accept client:" << client << std::endl;
+                            cout << "accept client :" << client << '\n';
                         }
-                    }
-                    else {
+                    }else {
 
-                        int r{ client_handler(sock) };
+                        const int r{ client_handler(sock) };
 
                         if (-1 == r) {
 
                             FD_CLR(sock, &reads);
-
                             closesocket(sock);
+                            cout << "client(" << sock << ") quit\n";
                         }
                     }
                 }
@@ -127,9 +116,7 @@ int main()
     }
 
     closesocket(server);
-
     WSACleanup();
-
     return 0;
 }
 
