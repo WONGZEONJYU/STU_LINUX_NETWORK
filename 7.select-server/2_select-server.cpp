@@ -5,10 +5,24 @@
 #include <arpa/inet.h>
 #include <cstdio>
 #include <unistd.h>
+#include <signal.h>
 #include <cstring>
 #include <iostream>
+#include <functional>
 
 using namespace std;
+
+static function<void(int,siginfo_t*,void*)> func_;
+
+static void signal_handler(const int sig,siginfo_t* info,void*)
+{
+    constexpr char str[] {"\nexit\n"};
+    write(0,str,sizeof(str));
+    if (func_){
+        func_(sig,info,nullptr);
+    }
+    exit(0);
+}
 
 int server_handler(int server)
 {
@@ -17,17 +31,17 @@ int server_handler(int server)
     return accept(server,reinterpret_cast<sockaddr *>(&addr),&asize);
 }
 
-int client_handler(int client)
+int client_handler(const int client)
 {
     char buf[32]{};
 
-    int ret ( read(client,reinterpret_cast<void *>(buf),(sizeof(buf) - 1)) );
+    int ret ( read(client,buf,(sizeof(buf) - 1)) );
 
     if (ret > 0){
 
         buf[ret] = 0;
 
-        std::cout << "Receive :" << buf << std::endl;
+        std::cout << "Receive (" << client << ")" <<":" << buf << '\n';
 
         if (strcmp(buf,"quit")){
             
@@ -40,34 +54,41 @@ int client_handler(int client)
     return ret;
 }
 
-int main() 
+int main(int argc,char* argv[]) 
 {
     const int server {socket(PF_INET,SOCK_STREAM,0)};
 
     if (-1 == server){
-        cout << "server socket error" << endl;
+        cout << "server socket error\n";
         return -1;
     }
 
-    sockaddr_in saddr {};
+    func_ = [&](const int sig,siginfo_t* info,void*){
+        close(server);
+    };
 
+    struct sigaction act{};
+    act.sa_flags = SA_RESTART | SA_SIGINFO ;
+    act.sa_sigaction = signal_handler;
+
+    sigaction(SIGINT,&act,nullptr);
+
+    sockaddr_in saddr {};
     saddr.sin_family = AF_INET;
     saddr.sin_addr.s_addr = htonl(INADDR_ANY);//htonl函数把小端转换成大端（网络字节序采用大端）
     saddr.sin_port = htons(8888);
 
     if ( -1 == bind( server,reinterpret_cast<const sockaddr *>(&saddr),sizeof(saddr) ) ){
-        cout << "server bind error" << endl;
+        cout << "server bind error\n";
         return -1;
     }
 
     if ( -1 == listen(server,1) ){
-        cout << "server listen error" << endl;
+        cout << "server listen error\n";
         return -1;
     }
 
-    cout << "server start success" << endl;
-
-    cout << "server socket_fd :" << server << endl;
+    cout << "server start success\n" << "server socket_fd :" << server << '\n';
 
     int max{server};
     fd_set reads{};
@@ -91,7 +112,7 @@ int main()
 
                     if (i == server) {
 
-                        int client {server_handler(server)};
+                        const int client {server_handler(server)};
 
                         if( client > -1 ){
 
@@ -99,20 +120,20 @@ int main()
 
                             max = ((client > max) ? client : max);
 
-                            std::cout << "accept client:" << client << std::endl;
-                            std::cout << "max:" << max << std::endl;
-                            std::cout << "server :" << server << std::endl;
+                            cout << "accept client: " << client << 
+                                    " max: " << max << 
+                                    " server: " << server << '\n';
                         }
 
                     } else{
                         
-                        int r { client_handler(i) };
+                        const int r { client_handler(i) };
 
                         if (-1 == r){
                             
                             FD_CLR(i,&reads);
-
                             close(i);
+                            cout << "client(" << i << ") quit\n";
                         }
                     }
                 }

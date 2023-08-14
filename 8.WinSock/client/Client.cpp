@@ -5,19 +5,19 @@
 
 using namespace std;
 
-int main()
+int main(int argc, char* argv[])
 {
     WSADATA wd{};
 
-    if (WSAStartup(MAKEWORD(2,2) , &wd)){
-        cout << "startup error" << endl;
+    if (WSAStartup(MAKEWORD(2, 2), &wd)) {
+        cout << "startup error\n";
         return -1;
     }
 
     SOCKET sock{ socket(PF_INET,SOCK_STREAM,IPPROTO_TCP) };
 
     if (INVALID_SOCKET == sock) {
-        cout << "socket error" << endl;
+        cout << "socket error\n";
         return -1;
     }
 
@@ -27,17 +27,17 @@ int main()
     addr.sin_port = htons(8888);
 
     if (SOCKET_ERROR == connect(sock, reinterpret_cast<const sockaddr*>(&addr), sizeof(addr))) {
-        cout << "connect error" << endl;
+        cout << "connect error\n";
         return -1;
     }
 
-    cout << "connect success sock :" << sock << endl;
+    cout << "connect success sock :" << sock << '\n';
 
     for (;;) {
 
         char input[32]{}, buf[128]{};
 
-        cout << "Input: " << endl;
+        cout << "Input: \n";
 
         cin >> input;
 
@@ -46,10 +46,10 @@ int main()
         int r(recv(sock, buf, sizeof(buf), 0));
 
         if (r > 0) {
-            cout << "Receive :" << buf << endl;
+            cout << "Receive :" << buf << '\n';
         }
         else {
-            cout << "client quit r :" << r << endl;
+            cout << "client quit r :" << r << '\n';
             break;
         }
     }

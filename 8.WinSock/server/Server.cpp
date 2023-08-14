@@ -1,46 +1,44 @@
 ﻿#include <iostream>
 #include <WinSock2.h>
-#include <vector>
 
 //需在工程设置链接器(linker)输入选项添加ws2_32.lib
 
 using namespace std;
 
-int main()
+int main(int argc, char* argv[])
 {
     WSADATA wd{};
 
-    if (WSAStartup(MAKEWORD(2,2),&wd)){
-        cout << "startup error" << endl;
+    if (WSAStartup(MAKEWORD(2, 2), &wd)) {
+        cout << "startup error\n";
         return -1;
     }
 
     SOCKET server{ socket(PF_INET,SOCK_STREAM,IPPROTO_TCP) };
 
     if (INVALID_SOCKET == server) {
-        cout << "server socket error" << endl;
+        cout << "server socket error\n";
         return -1;
     }
 
     sockaddr_in saddr{};
-
     saddr.sin_family = AF_INET;
     saddr.sin_addr.s_addr = htonl(INADDR_ANY);//htonl函数把小端转换成大端（网络字节序采用大端）
     saddr.sin_port = htons(8888);
 
     if (SOCKET_ERROR == bind(server, reinterpret_cast<const sockaddr*>(&saddr), sizeof(saddr))) {
-        cout << "server bind error" << endl;
+        cout << "server bind error\n";
         return -1;
     }
 
     if (SOCKET_ERROR == listen(server, 1)) {
-        cout << "server listen error" << endl;
+        cout << "server listen error\n";
         return -1;
     }
 
-    cout << "server start success" << endl;
+    cout << "server start success\n";
 
-    while (true) {
+    for (;;) {
 
         sockaddr_in caddr{};
         int asize{ sizeof(caddr) };
@@ -48,11 +46,11 @@ int main()
         SOCKET client{ accept(server,reinterpret_cast<sockaddr*>(&caddr),&asize) };
 
         if (INVALID_SOCKET == client) {
-            cout << "client accept success" << endl;
+            cout << "client accept success\n";
             return -1;
         }
 
-        cout << "client :" << client << endl; //client的数值表示系统资源的id
+        cout << "client :" << client << '\n'; //client的数值表示系统资源的id
 
         int r{}, len{};
 
@@ -63,7 +61,7 @@ int main()
 
             if (r > 0) {
 
-                cout << "Server Receive :" << buf << endl;
+                cout << "Server Receive :" << buf << '\n';
 
                 if (strcmp(buf, "quit")) {
 
