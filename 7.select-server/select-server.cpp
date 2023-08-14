@@ -10,7 +10,7 @@
 
 using namespace std;
 
-int server_handler(int server)
+int server_handler(const int server)
 {
     sockaddr_in addr{};
     socklen_t asize {sizeof(addr)};
@@ -21,13 +21,13 @@ int client_handler(int client)
 {
     char buf[32]{};
 
-    int ret ( read(client,reinterpret_cast<void *>(buf),(sizeof(buf) - 1)) );
+    int ret ( read(client,buf,(sizeof(buf) - 1)) );
 
     if (ret > 0){
 
         buf[ret] = 0;
 
-        std::cout << "Receive :" << buf << std::endl;
+        cout << "Receive :" << buf << '\n';
 
         if (strcmp(buf,"quit")){
             
@@ -45,7 +45,7 @@ int main()
     int server {socket(PF_INET,SOCK_STREAM,0)};
 
     if (-1 == server){
-        cout << "server socket error" << endl;
+        cout << "server socket error\n";
         return -1;
     }
 
@@ -56,17 +56,17 @@ int main()
     saddr.sin_port = htons(8888);
 
     if ( -1 == bind( server,reinterpret_cast<const sockaddr *>(&saddr),sizeof(saddr) ) ){
-        cout << "server bind error" << endl;
+        cout << "server bind error\n";
         return -1;
     }
 
     if ( -1 == listen(server,1) ){
-        cout << "server listen error" << endl;
+        cout << "server listen error\n";
         return -1;
     }
 
-    cout << "server start success" << endl;
-    cout << "server socket_fd :" << server << endl;
+    cout << "server start success\n";
+    cout << "server socket_fd :" << server << '\n';
 
     int max{server};
     fd_set reads{};
