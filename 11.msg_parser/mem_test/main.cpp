@@ -14,35 +14,35 @@ int main(int argc, char const *argv[])
     char data[] {0x11,0x12,0x13,0x14};
 
     Message * m = MParser_ReadMem(p,reinterpret_cast<uint8_t *>(buf),sizeof(buf));
-    cout << "m = " << m << endl;
+    cout << "m = " << m << '\n';
 
     if (!m){
-        cout << "parser again..." << endl;
+        cout << "parser again...\n";
         m = MParser_ReadMem(p,reinterpret_cast<uint8_t * >(another),sizeof(another));
     }
-    cout << "m = " << m << endl;
 
+    cout << "m = " << m << '\n';
 
     if (!m){
-        cout << "parser again again..." << endl;
+        cout << "parser again again...\n";
         m = MParser_ReadMem(p,reinterpret_cast<uint8_t * >(data),sizeof(data));
     }
-    cout << "m = " << m << endl;
 
+    cout << "m = " << m << '\n';
 
     if (m){
         
-        cout << "type = " << m->type << endl; 
-        cout << "cmd = " << m->cmd << endl; 
-        cout << "index = " << m->index << endl; 
-        cout << "total = " << m->total << endl; 
-        cout << "length = " << m->length << endl; 
+        cout << "type = " << m->type << 
+                "\ncmd = " << m->cmd <<
+                "\nindex = " << m->index << 
+                "\ntotal = " << m->total << 
+                "\nlength = " << m->length << '\n';
 
         for (int i {}; i < m->length; i++) {
             printf("0x%02x ",m->payload[i]);
         }
 
-        cout << endl;
+        cout << '\n';
 
         free(m);
     }
