@@ -2,20 +2,20 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <cstdio>
 #include <unistd.h>
+#include <cstdio>
 #include <cstring>
 #include <iostream>
 #include "message.h"
 
 using namespace std;
 
-int main() 
+int main(int argc,char* argv[])
 {
     int sock{socket(PF_INET,SOCK_STREAM,0)};
 
     if (-1 == sock){
-        cout << "socket error" << endl;
+        cout << "socket error\n";
         return -1;
     }
 
@@ -25,11 +25,11 @@ int main()
     addr.sin_port = htons(8888);
 
     if ( -1 == connect( sock,reinterpret_cast<sockaddr *>(&addr),sizeof(addr) )){
-        cout << "connect error" << endl;
+        cout << "connect error\n";
         return -1;
     }
 
-    cout << "connect success sock :" << sock << endl;
+    cout << "connect success sock :" << sock << '\n';
 
     Message *pm {Message_New(0,0,1,3,"A",1)};
     send(sock,pm,sizeof(Message) + 1,0);

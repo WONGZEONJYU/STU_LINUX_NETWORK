@@ -24,7 +24,7 @@ Message * Message_New(unsigned short const type,
             /* (ret+1) 是跳到柔性数组指针*/
         }
     }
-    
+
     return ret;
 }
 
