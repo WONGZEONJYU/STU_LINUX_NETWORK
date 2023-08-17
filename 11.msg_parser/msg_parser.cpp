@@ -78,7 +78,7 @@ MParser * MParser_New()
     return ret;
 }
 
-Message * MParser_ReadMem(MParser * parser,unsigned char * mem,unsigned int length)
+Message * MParser_ReadMem(MParser* parser,unsigned char * mem,unsigned int length)
 {
     MsgParser * p { reinterpret_cast<MsgParser *>(parser) };
 
@@ -89,8 +89,8 @@ Message * MParser_ReadMem(MParser * parser,unsigned char * mem,unsigned int leng
         if (!p->header){    //解析数据头
 
             int len ( (p->need < length) ? p->need : length );  //取最小值，内存中的数据长度不一定达到协议数据头所需的字节数
-            int offset ( sizeof(p->cache) - p->need );
-            char * _cache { reinterpret_cast<char *>(&p->cache) + offset };
+            int offset ( sizeof(p->cache) - p->need );          //计算消息头存储区的偏移量
+            char* _cache { reinterpret_cast<char *>(&p->cache) + offset };
 
             memcpy(_cache,mem,len);
 
@@ -116,13 +116,9 @@ Message * MParser_ReadMem(MParser * parser,unsigned char * mem,unsigned int leng
             if (p->msg){
 
                 int len ( (p->need < length) ? p->need : length );//取最小值
-
                 int offset ( p->msg->length - p->need );
-
                 memcpy((p->msg->payload + offset),mem,len);
-
                 p->need -= len;
-
             }
 
             if (ret = ToLastState(p)){

@@ -3,10 +3,7 @@
 
 struct Message
 {
-    unsigned short type;
-    unsigned short cmd;
-    unsigned short index;
-    unsigned short total;
+    unsigned short type,cmd,index,total;
     unsigned int length;
     unsigned char payload[];
 };
