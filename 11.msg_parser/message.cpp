@@ -1,14 +1,14 @@
 #include "message.h"
-#include <malloc.h>
+#include <stdlib.h>
 #include <string.h>
 #include <arpa/inet.h>
 
-Message * Message_New(unsigned short type,
-                    unsigned short cmd,
-                    unsigned short index,
-                    unsigned short total,
+Message * Message_New(unsigned short const type,
+                    unsigned short const cmd,
+                    unsigned short const index,
+                    unsigned short const total,
                     const char * payload,
-                    unsigned int length)
+                    unsigned int const length)
 {
     Message * ret {reinterpret_cast<Message *>(malloc(sizeof(Message) + length))};
 
@@ -21,25 +21,25 @@ Message * Message_New(unsigned short type,
 
         if (payload){
             memcpy(ret + 1,payload,length);
+            /* (ret+1) 是跳到柔性数组指针*/
         }
     }
-    
+
     return ret;
 }
 
 int Message_Size(Message *m)
 {
-    int ret {};
+    // int ret {};
+    // if (m){
+    //     ret = sizeof(Message) + m->length;
+    // }
+    // return ret;
 
-    if (m){
-
-        ret = sizeof(Message) + m->length;
-    }
-
-    return ret;
+    return m ? (sizeof(Message) + m->length) : 0;
 }
 
-Message *Message_N2H(Message *m)
+Message* Message_N2H(Message *m)
 {
     if (m){
 
@@ -53,7 +53,7 @@ Message *Message_N2H(Message *m)
     return m;
 }
 
-Message *Message_H2N(Message *m)
+Message* Message_H2N(Message *m)
 {
     if (m){
 
