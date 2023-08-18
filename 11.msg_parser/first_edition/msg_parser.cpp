@@ -25,13 +25,15 @@ MParser* MParser_New()
 Message* MParser_ReadMem(MParser* parser, unsigned char* mem, unsigned int length)
 {
     auto p {reinterpret_cast<MsgParser*>(parser)};
+
     Message* ret {};
 
     if (p && mem && length){
-        
-        if (!p->header)
-        {
+
+        if (!p->header){
+
             if (p->need <= length){
+
                 memcpy(&p->cache,mem,p->need);
 
                 p->cache.type = ntohs(p->cache.type);
@@ -50,6 +52,7 @@ Message* MParser_ReadMem(MParser* parser, unsigned char* mem, unsigned int lengt
 
                 p->header = 1;
                 p->need = p->cache.length;
+                
                 
                 ret = MParser_ReadMem(p,mem,length);
             }

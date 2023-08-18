@@ -1,7 +1,7 @@
 #ifndef MSG_PARSER_H
 #define MSG_PARSER_H
 
-#include "message.h"
+#include "../message.h"
 
 using MParser = void;
 

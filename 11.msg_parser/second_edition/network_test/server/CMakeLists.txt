@@ -22,5 +22,5 @@ include_directories(../../)
 
 add_executable(server 
             server.cpp
-            ../../message.cpp 
+            ../../../message.cpp 
             ../../msg_parser.cpp)
