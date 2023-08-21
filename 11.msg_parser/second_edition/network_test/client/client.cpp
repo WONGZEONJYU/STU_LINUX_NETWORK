@@ -10,12 +10,12 @@
 
 using namespace std;
 
-int main() 
+int main(int argc,char* argv[]) 
 {
     int sock{socket(PF_INET,SOCK_STREAM,0)};
 
     if (-1 == sock){
-        cout << "socket error" << endl;
+        cout << "socket error\n";
         return -1;
     }
 
@@ -25,25 +25,25 @@ int main()
     addr.sin_port = htons(8888);
 
     if ( -1 == connect( sock,reinterpret_cast<sockaddr *>(&addr),sizeof(addr) )){
-        cout << "connect error" << endl;
+        cout << "connect error\n";
         return -1;
     }
 
-    cout << "connect success sock :" << sock << endl;
+    cout << "connect success sock :" << sock << '\n';
 
-    const char * test {"HelloWorld"};
+    constexpr char test[] {"HelloWorld"};
 
     for (int i {}; i < strlen(test); i++){
 
-        char buf[2]{};
+        char buf[2]{};/*存一个字符的字符串,数组为2是还有一个字符串结束符 `\0` */
 
         buf[0] = test[i];
 
-        Message *pm { Message_New(128,129,i,strlen(test),buf,2) };
+        Message *pm { Message_New(128,129,i,strlen(test),buf,sizeof(buf)) };
 
         Message_H2N(pm);
 
-        send(sock,pm,(sizeof(Message) + 2),0);
+        send(sock,pm,(sizeof(Message) + sizeof(buf)),0);
 
         //usleep(1000);
 
