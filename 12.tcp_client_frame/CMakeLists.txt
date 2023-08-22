@@ -24,4 +24,12 @@ add_executable(tcp_client_frame
             client.cpp
             tcp_client.cpp
             ../11.msg_parser/message.cpp 
-            ../11.msg_parser/msg_parser.cpp)
+            ../11.msg_parser/second_edition/msg_parser.cpp)
+
+add_executable(
+    server
+    server.cpp
+    tcp_client.cpp
+    ../11.msg_parser/message.cpp
+    ../11.msg_parser/second_edition/msg_parser.cpp
+)

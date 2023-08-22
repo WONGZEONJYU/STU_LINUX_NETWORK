@@ -3,14 +3,13 @@
 
 #include "message.h"
 
-
-typedef void TcpClient;
+using TcpClient = void;
 
 TcpClient* TcpClient_New();
 TcpClient* TcpClient_From(int fd);
 
 int TcpClient_SendMsg(TcpClient* client, Message* msg); 
-int TcpClient_SendRaw(TcpClient* client, char* buf, int length);
+int TcpClient_SendRaw(TcpClient* client, const char* buf, int length);
 Message* TcpClient_RecvMsg(TcpClient* client);
 int TcpClient_RecvRaw(TcpClient* client, char* buf, int length);
 

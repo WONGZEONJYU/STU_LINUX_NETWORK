@@ -11,13 +11,15 @@
 
 using namespace std;
 
-int main() 
+int main(int argc,char* argv[]) 
 {
-    TcpClient * client {TcpClient_New()};
+    auto client {TcpClient_New()};
 
     if (client && TcpClient_Connect(client,"127.0.0.1",8888)){
+        
+        cout << "connect successed\n";
 
-        const char * test {"wongzeonjyu"};
+        constexpr char test[] {"wongzeonjyu"};
 
         for (int i {}; i < strlen(test); i++){
 
@@ -25,7 +27,7 @@ int main()
 
             buf[0] = test[i];
 
-            Message *pm { Message_New(128,129,i,strlen(test),buf,2) };
+            auto pm { Message_New(128,129,i,strlen(test),buf,2) };
 
             TcpClient_SendMsg(client,pm);
 
