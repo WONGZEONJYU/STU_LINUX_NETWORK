@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(test)
+project(memtest)
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -20,4 +20,4 @@ set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 
 include_directories(..)
 
-add_executable(test memtest.cpp ../../message.cpp ../msg_parser.cpp)
+add_executable(memtest memtest.cpp ../message.cpp ../msg_parser.cpp)

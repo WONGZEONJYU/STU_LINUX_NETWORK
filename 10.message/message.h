@@ -20,3 +20,4 @@ Message *Message_N2H(Message *m);
 Message *Message_H2N(Message *m);
 
 #endif // MESSAGE_H
+

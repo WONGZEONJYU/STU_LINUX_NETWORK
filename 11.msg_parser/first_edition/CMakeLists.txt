@@ -20,5 +20,5 @@ set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 
 include_directories(..)
 
-add_executable( test memtest.cpp msg_parser.cpp ../message.cpp )
+add_executable(test memtest.cpp msg_parser.cpp message.cpp )
 

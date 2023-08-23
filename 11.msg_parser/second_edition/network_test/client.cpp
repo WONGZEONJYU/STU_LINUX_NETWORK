@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <cstring>
 #include <iostream>
-#include "../../message.h"
+#include "../message.h"
 
 using namespace std;
 
@@ -44,8 +44,6 @@ int main(int argc,char* argv[])
         Message_H2N(pm);
 
         send(sock,pm,(sizeof(Message) + sizeof(buf)),0);
-
-        //usleep(1000);
 
         free(pm);
     }

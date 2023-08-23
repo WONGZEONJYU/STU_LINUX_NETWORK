@@ -18,14 +18,14 @@ set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 
-include_directories(../../)
+include_directories(../)
 
 add_executable(server 
             server.cpp
-            ../../../message.cpp 
-            ../../msg_parser.cpp)
+            ../message.cpp 
+            ../msg_parser.cpp)
 
 add_executable(client 
             client.cpp 
-            ../../../message.cpp 
-            ../../msg_parser.cpp)
+            ../message.cpp 
+            ../msg_parser.cpp)
