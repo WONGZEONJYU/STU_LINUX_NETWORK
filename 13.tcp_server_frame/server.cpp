@@ -8,7 +8,7 @@
 
 using namespace std;
 
-void EventListener(TcpClient * client,int evt){
+void EventListener(TcpClient* client,int evt){
 
     if (EVT_CONN == evt){
 
@@ -16,12 +16,11 @@ void EventListener(TcpClient * client,int evt){
         
     }else if (EVT_DATA == evt){
        
-        Message * m { TcpClient_RecvMsg(client) };
+        Message* m { TcpClient_RecvMsg(client) };
 
         if (m) {
 
             // cout << "index = " << m->index << " total = " << m->total << " payload = " << m->payload << endl;
-
             // free(m);
 
             char * s { reinterpret_cast<char *>(TcpClient_GetData(client)) };
@@ -32,7 +31,6 @@ void EventListener(TcpClient * client,int evt){
             if (0 == m->index){
 
                 s = reinterpret_cast<char *>(malloc(m->total + 1));
-
                 TcpClient_SetData(client,s);
             }
 
