@@ -1,7 +1,7 @@
-#include <cstring>
-#include <malloc.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <cstring>
+#include <cstdlib>
 #include "msg_parser.h"
 
 struct MsgParser

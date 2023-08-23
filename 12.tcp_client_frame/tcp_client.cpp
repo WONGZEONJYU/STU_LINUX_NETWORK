@@ -5,7 +5,7 @@
 #include <netinet/tcp.h>
 #include <unistd.h>
 #include <cstdlib>
-#include "../11.msg_parser/second_edition/msg_parser.h"
+#include "msg_parser.h"
 
 struct Client
 {
