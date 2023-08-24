@@ -116,8 +116,10 @@ static int SelectHandler(Server* s,
             if (s->cb){
 
                 if (TcpClient_IsValid(s->client[index])){
+                    /*TCP还是连接状态*/
                     s->cb(s->client[index],event);
                 }else{
+                    /*TCP已经断开*/
                     if (s->client[index]){
                         s->cb(s->client[index],EVT_CLOSE);
                     }
