@@ -9,12 +9,12 @@
 
 using namespace std;
 
-int main() 
+int main(int argc, char const *argv[])
 {
     int sock{socket(PF_INET,SOCK_STREAM,0)};
 
     if (-1 == sock){
-        cout << "socket error" << endl;
+        cout << "socket error\n";
         return -1;
     }
 
@@ -24,20 +24,17 @@ int main()
     addr.sin_port = htons(8888);
 
     if ( -1 == connect( sock,reinterpret_cast<sockaddr *>(&addr),sizeof(addr) )){
-        cout << "connect error" << endl;
+        cout << "connect error\n";
         return -1;
     }
 
-    cout << "connect success sock :" << sock << endl;
+    cout << "connect success sock :" << sock << '\n';
 
-    const char * test {"wongzeonjyu"};
+    const char * test {"helloworld"};
 
     for (int i {}; i < strlen(test); i++){
-
         send(sock,(test + i),1,0);
-
         if (i % 2){
-
             sleep(1);
         }
     }
@@ -46,16 +43,12 @@ int main()
 
     int i {};
     for (; i < (strlen(test) - 1); i++){
-
         send(sock,(test + i),1,MSG_MORE);
-
         sleep(1);
     }
 
     send(sock,test + i,1,0);
-
     getchar();
-
     close(sock);
 
     return 0;
