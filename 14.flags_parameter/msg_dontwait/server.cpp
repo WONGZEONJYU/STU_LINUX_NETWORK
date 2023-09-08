@@ -9,12 +9,12 @@
 
 using namespace std;
 
-int main() 
+int main(int argc,char* argv[])
 {
     int server {socket(PF_INET,SOCK_STREAM,0)};
 
     if (-1 == server){
-        cout << "server socket error" << endl;
+        cout << "server socket error\n";
         return -1;
     }
 
@@ -25,63 +25,50 @@ int main()
     saddr.sin_port = htons(8888);
 
     if ( -1 == bind( server,reinterpret_cast<const sockaddr *>(&saddr),sizeof(saddr) ) ){
-        cout << "server bind error" << endl;
+        cout << "server bind error\n";
         return -1;
     }
 
     if ( -1 == listen(server,1) ){
-        cout << "server listen error" << endl;
+        cout << "server listen error\n";
         return -1;
     }
 
-    cout << "server start success" << endl;
+    cout << "server start success\n";
 
     while (true){
 
         sockaddr_in caddr {};
         socklen_t asize {sizeof(caddr)};
 
-        int client {accept(server,reinterpret_cast<sockaddr *>(&caddr),&asize)};
+        int client { accept(server,reinterpret_cast<sockaddr *>(&caddr),&asize) };
 
         if (-1 == client){
-            cout << "client accept error" << endl;
+            cout << "client accept error\n";
             return -1;
         }
 
-        cout << "client :" << client << endl; //client的数值表示系统资源的id
-
+        cout << "client :" << client << '\n'; //client的数值表示系统资源的id
         int r {},len{};
 
         do{
             char buf[32]{};
-
-            r = recv(client,reinterpret_cast<void * >(buf),sizeof(buf),MSG_DONTWAIT);
+            r = recv(client,buf,sizeof(buf),MSG_DONTWAIT);
 
             if (r > 0){
-
                 buf[r] = 0;
-
-                cout << "r = "<< r << endl;
-
-                cout << "data : " << buf << endl;
-
-                if (strcmp(buf,"quit") == 0){
+                cout << "r = "<< r <<
+                    "\ndata : " << buf << '\n';
+                if (0 == strcmp(buf,"quit") ){
                     break;
                 }
-
             }else{
-
-                cout << "no data in receive buf" << endl;
-
+                cout << "no data in receive buf\n";
                 sleep(1);
             }
-
-        } while (1);
-
+        } while (true);
         close(client);
     }
-
     close(server);
-
     return 0;
 }
