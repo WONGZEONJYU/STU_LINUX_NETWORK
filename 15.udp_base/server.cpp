@@ -9,7 +9,7 @@
 
 using namespace std;
 
-int main() 
+int main(int argc, char* argv[])
 {
     int server {socket(PF_INET,SOCK_DGRAM,0)};
 
@@ -24,34 +24,29 @@ int main()
     saddr.sin_port = htons(8888);
 
     if ( -1 == bind( server,reinterpret_cast<const sockaddr *>(&saddr),sizeof(saddr) ) ){
-        cout << "udp server bind error" << endl;
+        cout << "udp server bind error\n";
         return -1;
     }
 
-    cout << "udp server start success" << endl;
+    cout << "udp server start success\n";
 
-    while (true){
+    for(;;){
 
         sockaddr_in remote {};
-
         socklen_t len {sizeof(remote)};
-
         char buf[128]{};
-
-        int r (recvfrom(server,buf,sizeof(buf),0,reinterpret_cast<sockaddr * >(&remote),&len));
+        const auto r {recvfrom(server,buf,sizeof(buf),0,reinterpret_cast<sockaddr* >(&remote),&len)};
 
         buf[r] = 0;
 
-        cout << "r = " << r << endl;
-        cout << "buf = " << buf << endl;
-        cout << "remote ip = " << inet_ntoa(remote.sin_addr) << endl;
-        cout << "remote port = " << ntohs(remote.sin_port) << endl;
+        cout << "r = " << r << 
+            "\nbuf = " << buf << 
+            "\nremote ip = " << inet_ntoa(remote.sin_addr) << 
+            "\nremote port = " << ntohs(remote.sin_port) << '\n';
 
         sendto(server,buf,r,0,reinterpret_cast<const sockaddr * >(&remote),len);
-
     }
 
     close(server);
-
     return 0;
 }
