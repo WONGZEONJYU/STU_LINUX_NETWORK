@@ -40,8 +40,8 @@ int main(int argc, char *argv[])
 
     int brd {1};
     setsockopt(server,SOL_SOCKET,SO_BROADCAST,&brd,sizeof(brd));//socket广播设置
-
-    char buf[32]{"WONGZEONJYU"};
+    /*如果没有设置socket广播或者brd设置为0 , 是不会进行广播的*/
+    char buf[32]{"hello_world"};
     const auto r { strlen(buf)} ;
     buf[r] = 0;
 
