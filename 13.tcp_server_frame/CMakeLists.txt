@@ -18,12 +18,11 @@ set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 
-include_directories(../11.msg_parser/)
-include_directories(../12.tcp_client_frame/)
+include_directories(./)
 
 add_executable(tcp_server_frame 
             server.cpp
             tcp_server.cpp
-            ../12.tcp_client_frame/tcp_client.cpp
-            ../11.msg_parser/message.cpp 
-            ../11.msg_parser/msg_parser.cpp)
+            tcp_client.cpp
+            message.cpp 
+            msg_parser.cpp)

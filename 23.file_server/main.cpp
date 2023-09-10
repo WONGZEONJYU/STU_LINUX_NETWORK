@@ -164,7 +164,7 @@ static void Run(const char *root)
 
         if (*line){
             
-            char * cmd {FormatByChar(line,' ')};
+            char* cmd {FormatByChar(line,' ')};
             bool done{};
 
             for (size_t i {}; i < DIM(g_handler); i++){

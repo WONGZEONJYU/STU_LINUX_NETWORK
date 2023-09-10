@@ -9,12 +9,12 @@
 
 using namespace std;
 
-int main() 
+int main(int argc,char* argv[])
 {
-    int sock{socket(PF_INET,SOCK_STREAM,0)};
+    const int sock {socket(PF_INET,SOCK_STREAM,0)};
 
     if (-1 == sock){
-        cout << "socket error" << endl;
+        cout << "socket error\n";
         return -1;
     }
 
@@ -24,21 +24,17 @@ int main()
     addr.sin_port = htons(8888);
 
     if ( -1 == connect( sock,reinterpret_cast<sockaddr *>(&addr),sizeof(addr) )){
-        cout << "connect error" << endl;
+        cout << "connect error\n";
         return -1;
     }
 
-    cout << "connect success sock :" << sock << endl;
+    cout << "connect success sock :" << sock << '\n';
 
     sleep(2);
 
-    const char * test {"wongzeonjyu"};
-
-    int len (send(sock,reinterpret_cast<const void *>(test),strlen(test),0));
-
+    constexpr char test[] {"hello_world"};
+    const auto len {send(sock,test,strlen(test),0)};
     getchar();
-
     close(sock);
-
     return 0;
 }

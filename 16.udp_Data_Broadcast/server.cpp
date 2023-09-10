@@ -9,12 +9,12 @@
 
 using namespace std;
 
-int main() 
+int main(int argc, char *argv[])
 {
     int server {socket(PF_INET,SOCK_DGRAM,0)};
 
     if (-1 == server){
-        cout << "server socket error" << endl;
+        cout << "server socket error\n";
         return -1;
     }
 
@@ -24,11 +24,11 @@ int main()
     saddr.sin_port = htons(8888);
 
     if ( -1 == bind( server,reinterpret_cast<const sockaddr *>(&saddr),sizeof(saddr) ) ){
-        cout << "udp server bind error" << endl;
+        cout << "udp server bind error\n";
         return -1;
     }
 
-    cout << "udp server start success" << endl;
+    cout << "udp server start success\n";
 
     sockaddr_in remote {};
 
@@ -42,17 +42,14 @@ int main()
     setsockopt(server,SOL_SOCKET,SO_BROADCAST,&brd,sizeof(brd));//socket广播设置
 
     char buf[32]{"WONGZEONJYU"};
-    int r(strlen(buf));
+    const auto r { strlen(buf)} ;
     buf[r] = 0;
 
-    while (true){
-
+    for(;;){
         sendto(server,buf,r,0,reinterpret_cast<const sockaddr * >(&remote),len);
-
         sleep(1);
     }
 
     close(server);
-
     return 0;
 }

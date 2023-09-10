@@ -1,7 +1,7 @@
-#include <cstring>
-#include <malloc.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <cstring>
+#include <cstdlib>
 #include "msg_parser.h"
 
 struct MsgParser
@@ -12,7 +12,7 @@ struct MsgParser
     Message cache;      //缓存已解析的消息头
 };
 
-static inline void InitState(MsgParser * p)
+static void InitState(MsgParser * p)
 {
     p->header = 0;
     p->need = sizeof(p->cache);
@@ -31,7 +31,7 @@ static int ToMidState(MsgParser * p)
     return !!p->msg;
 }
 
-static inline Message *ToLastState(MsgParser * p)
+static Message *ToLastState(MsgParser * p)
 {
     Message * ret {};
 
@@ -43,17 +43,17 @@ static inline Message *ToLastState(MsgParser * p)
     return ret;
 }
 
-static int ToRecv(int fd,char * buf,int size)
+static int ToRecv(const int fd,char * buf,const int size)
 {
     int retry{},i{};
 
     while (i < size){
 
-        int len (read(fd,(buf + i),(size - i)));
+        auto len {read(fd,(buf + i),(size - i))};
 
         if (len > 0){
             i += len;
-        }else if (len < 0){ //读取数据出错
+        }else if (len < 0){ //读取数据出错 -1 == len
             break;
         }else{   //0 == len
             if (++retry > 5){
@@ -66,21 +66,20 @@ static int ToRecv(int fd,char * buf,int size)
     return i;
 }
 
-MParser * MParser_New()
+MParser* MParser_New()
 {
-    MParser * ret {calloc(1,sizeof(MsgParser))};
+    auto ret {calloc(1,sizeof(MsgParser))};
 
     if (ret){
-
         InitState(reinterpret_cast<MsgParser * >(ret));
     }
 
     return ret;
 }
 
-Message * MParser_ReadMem(MParser* parser,unsigned char * mem,unsigned int length)
+Message* MParser_ReadMem(MParser* parser,unsigned char * mem,unsigned int length)
 {
-    MsgParser * p { reinterpret_cast<MsgParser *>(parser) };
+    auto p { reinterpret_cast<MsgParser *>(parser) };
 
     Message * ret {};
 
@@ -88,13 +87,13 @@ Message * MParser_ReadMem(MParser* parser,unsigned char * mem,unsigned int lengt
 
         if (!p->header){    //解析数据头
 
-            int len ( (p->need < length) ? p->need : length );  //取最小值，内存中的数据长度不一定达到协议数据头所需的字节数
-            int offset ( sizeof(p->cache) - p->need );          //计算消息头存储区的偏移量
-            char* _cache { reinterpret_cast<char *>(&p->cache) + offset };
+            const auto len {(p->need < length) ? p->need : length};  //取最小值，内存中的数据长度不一定达到协议数据头所需的字节数
+            const auto offset {sizeof(p->cache) - p->need };          //计算消息头存储区的偏移量
+            auto _cache { reinterpret_cast<char *>(&p->cache) + offset };
 
             memcpy(_cache,mem,len);
 
-            if (p->need == len){     //内存至少有12个字节才能解析数据头
+            if (len == p->need){     //内存至少有12个字节才能解析数据头
 
                 Message_N2H(&p->cache);//网络字节序转换成本机字节序
 
@@ -115,8 +114,8 @@ Message * MParser_ReadMem(MParser* parser,unsigned char * mem,unsigned int lengt
 
             if (p->msg){
 
-                int len ( (p->need < length) ? p->need : length );//取最小值
-                int offset ( p->msg->length - p->need );
+                const auto len {(p->need < length) ? p->need : length};
+                const auto offset {p->msg->length - p->need};   /*计算偏移量*/
                 memcpy((p->msg->payload + offset),mem,len);
                 p->need -= len;
             }
@@ -130,19 +129,19 @@ Message * MParser_ReadMem(MParser* parser,unsigned char * mem,unsigned int lengt
     return ret;
 }
 
-Message * MParser_ReadFd(MParser * parser,int fd) 
+Message* MParser_ReadFd(MParser * parser,int fd) 
 {
     Message * ret {};
 
-    MsgParser * p {reinterpret_cast<MsgParser *>(parser)};
+    auto p {reinterpret_cast<MsgParser *>(parser)};
 
     if ((-1 != fd) && p){
 
         if (!p->header){    //解析数据头
 
-            const int offset (sizeof(p->cache) - p->need);
-            char * header {reinterpret_cast<char *>(&p->cache) + offset};
-            const int len {ToRecv(fd,header,p->need)};
+            const auto offset {sizeof(p->cache) - p->need};
+            auto header {reinterpret_cast<char *>(&p->cache) + offset};
+            const auto len {ToRecv(fd,header,p->need)};
 
             if (len == p->need){
 
@@ -162,11 +161,11 @@ Message * MParser_ReadFd(MParser * parser,int fd)
 
             if (p->msg){
 
-                const int offset (p->msg->length - p->need);
+                const auto offset {p->msg->length - p->need};
 
-                char * payload {reinterpret_cast<char *>(p->msg->payload)};
+                auto payload {reinterpret_cast<char *>(p->msg->payload)};
 
-                const int len {ToRecv(fd,(payload + offset),p->need)};
+                const auto len {ToRecv(fd,(payload + offset),p->need)};
 
                 p->need -= len;
             }
@@ -182,7 +181,7 @@ Message * MParser_ReadFd(MParser * parser,int fd)
 
 void MParser_Reset(MParser * parser)
 {
-    MsgParser * p {reinterpret_cast<MsgParser *>(parser)};
+    auto p {reinterpret_cast<MsgParser *>(parser)};
 
     if (p){
         InitState(p);
@@ -191,7 +190,7 @@ void MParser_Reset(MParser * parser)
 
 void MParser_Del(MParser * parser)
 {
-    MsgParser * p {reinterpret_cast<MsgParser *>(parser)};
+    auto p {reinterpret_cast<MsgParser *>(parser)};
 
     if (p){
         free(p->msg);
