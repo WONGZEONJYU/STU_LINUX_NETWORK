@@ -28,7 +28,7 @@ Message * Message_New(unsigned short const type,
     return ret;
 }
 
-int Message_Size(Message *m)
+int Message_Size(const Message *m)
 {
     // int ret {};
     // if (m){

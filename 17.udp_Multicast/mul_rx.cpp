@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
     ip_mreq group{};
     group.imr_multiaddr.s_addr = inet_addr("224.1.1.168");	//发送端发往多播数据的IP地址
     group.imr_interface.s_addr = htonl(INADDR_ANY); /*单网卡没有问题,多网卡建议手动确定那个网卡*/
-
+    //group.imr_interface.s_addr = inet_addr("10.10.10.126");
     setsockopt(sock,IPPROTO_IP,IP_ADD_MEMBERSHIP,&group,sizeof(group));		//接收端加入多播组设置
 
     for(;;) {

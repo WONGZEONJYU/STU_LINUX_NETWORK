@@ -15,7 +15,7 @@ Message* Message_New(unsigned short type,
                     const char * payload,
                     unsigned int length);
 
-int Message_Size(Message *m);
+int Message_Size(const Message *m);
 Message* Message_N2H(Message *m);
 Message* Message_H2N(Message *m);
 
