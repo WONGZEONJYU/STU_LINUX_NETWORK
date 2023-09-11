@@ -10,14 +10,11 @@
 #include "msg_parser.h"
 #include "udp_point.h"
 
-struct Point
-{
+struct Point {
     int fd;
     MParser * parser;
     void * data;
 };
-
-static char g_temp[1024 * 4]{};//用于窥探数据长度，没有任何实际意义
 
 static void ParseAddr(struct sockaddr_in addr, char* ip, int* port)
 {
@@ -30,17 +27,26 @@ static void ParseAddr(struct sockaddr_in addr, char* ip, int* port)
     }
 }
 
-UdpPoint* UdpPoint_New(int port)
+//窥探一下当前有多少数据
+static auto has_data_helper(const int fd) 
 {
-    Point * ret { reinterpret_cast<Point * >(malloc(sizeof(Point))) };
+    sockaddr_in raddr {};
+    socklen_t addrlen {sizeof(raddr)};
+    static char g_temp[1024 * 4]{};
+    return recvfrom(fd, g_temp, sizeof(g_temp),
+                    MSG_PEEK | MSG_DONTWAIT, 
+                    reinterpret_cast<sockaddr*>(&raddr), &addrlen) ;
+}
 
-    int ok{ !!ret };
-
+UdpPoint* UdpPoint_New(const int port)
+{
     sockaddr_in addr {};
-
     addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = htonl(INADDR_ANY);
     addr.sin_port = htons(port);
+
+    auto ret { reinterpret_cast<Point * >(malloc(sizeof(Point))) };
+    int ok{ !!ret };
 
     ok = ok && (nullptr != (ret->parser = MParser_New()));
 
@@ -49,11 +55,9 @@ UdpPoint* UdpPoint_New(int port)
     ok = ok && (-1 != bind(ret->fd,reinterpret_cast<const sockaddr *>(&addr),sizeof(addr)));
 
     if (ok){
-
         ret->data = nullptr;
     }else{
-
-        ret ? (MParser_Del(ret->parser),nullptr) : nullptr;
+        ret ? (MParser_Del(ret->parser),nullptr) : nullptr; /*通过逗号表达式防止编译报错*/
         ret ? close(ret->fd): -1;
         free(ret);
         ret = nullptr;
@@ -62,16 +66,13 @@ UdpPoint* UdpPoint_New(int port)
     return ret;
 }
 
-UdpPoint* UdpPoint_From(int fd)
+UdpPoint* UdpPoint_From(const int fd)
 {
-    Point * ret { reinterpret_cast<Point * >(malloc(sizeof(Point))) };
+    auto ret { reinterpret_cast<Point * >(malloc(sizeof(Point))) };
 
     if (ret){
-
         ret->fd = fd;
-
         ret->parser = MParser_New();
-
         ret->data = nullptr;
     }
 
@@ -80,15 +81,15 @@ UdpPoint* UdpPoint_From(int fd)
 
 int UdpPoint_SendMsg(UdpPoint* point, Message* msg, const char* remote, int port)
 {
-    Point * c { reinterpret_cast<Point * >(point) } ;
+    auto c { reinterpret_cast<Point * >(point) } ;
 
     int ret {};
 
     if (c && msg && remote){
 
-        int len {Message_Size(msg)};
+        const int len {Message_Size(msg)};
 
-        char * data {reinterpret_cast<char *>(Message_H2N(msg))};
+        auto data {reinterpret_cast<const char *>(Message_H2N(msg))};
 
         ret = UdpPoint_SendRaw(c,data,len,remote,port);
 
@@ -98,23 +99,23 @@ int UdpPoint_SendMsg(UdpPoint* point, Message* msg, const char* remote, int port
     return ret;
 }
 
-int UdpPoint_SendRaw(UdpPoint* point, char* buf, int length, const char* remote, int port)
+int UdpPoint_SendRaw(UdpPoint* point, const char* buf,const int length, const char* remote,const int port)
 {
-    Point * c { reinterpret_cast<Point * >(point) } ;
+    auto c { reinterpret_cast<Point * >(point) } ;
 
     int ret {};
 
     if (c && buf && remote){
 
-        sockaddr_in addr{};
-        socklen_t len {sizeof(addr)};
+        sockaddr_in raddr{};
+        const socklen_t len {sizeof(raddr)};
 
-        addr.sin_family = AF_INET;
-        addr.sin_addr.s_addr = inet_addr(remote);
-        addr.sin_port = htons(port);
+        raddr.sin_family = AF_INET;
+        raddr.sin_addr.s_addr = inet_addr(remote);
+        raddr.sin_port = htons(port);
 
         ret = (-1 != (sendto(c->fd,buf,length,0,
-                    reinterpret_cast<const sockaddr * >(&addr),len)));
+                    reinterpret_cast<const sockaddr * >(&raddr),len)));
     }
 
     return ret;
@@ -122,31 +123,26 @@ int UdpPoint_SendRaw(UdpPoint* point, char* buf, int length, const char* remote,
 
 Message* UdpPoint_RecvMsg(UdpPoint* point, char* remote, int* port)
 {
-    Point * c { reinterpret_cast<Point * >(point) } ;
-
-    Message * ret{};
+    auto c { reinterpret_cast<Point * >(point) };
+    Message* ret{};
 
     if (c){
 
         sockaddr_in raddr {};
-
         socklen_t addrlen {sizeof(raddr)};
 
-        int length ( recvfrom(c->fd, g_temp, sizeof(g_temp), //窥探一下当前有多少数据
-                    MSG_PEEK, reinterpret_cast<sockaddr*>(&raddr), &addrlen) );
+        auto length { has_data_helper(c->fd) };//窥探一下当前有多少数据
 
-        unsigned char * buf { (length > 0) ? reinterpret_cast<unsigned char *>(malloc(length)) : nullptr };
+        auto buf { (length > 0) ? reinterpret_cast<unsigned char *>(malloc(length)) : nullptr };
 
         length = recvfrom(c->fd, buf, length, 0, 
                         reinterpret_cast<sockaddr*>(&raddr), &addrlen);
 
         if (length > 0){
-
             ret = MParser_ReadMem(c->parser,buf,length);
         }
 
         if(ret){
-
             ParseAddr(raddr,remote,port);//解析发送端的 IP地址及端口号
         }
     }
@@ -154,22 +150,19 @@ Message* UdpPoint_RecvMsg(UdpPoint* point, char* remote, int* port)
     return ret;
 }
 
-int UdpPoint_RecvRaw(UdpPoint* point, char* buf, int length, char* remote, int* port)
+int UdpPoint_RecvRaw(UdpPoint* point, char* buf, const int length, char* remote, int* port)
 {
-    Point * c { reinterpret_cast<Point * >(point) };
+    auto c { reinterpret_cast<Point * >(point) };
 
     int ret {-1};
 
     if (c && buf){
 
         sockaddr_in addr{};
-
         socklen_t len {sizeof(addr)};
-
         ret = recvfrom(c->fd ,buf ,length ,0 ,reinterpret_cast<sockaddr *>(&addr),&len);
 
         if (-1 != ret){
-
             ParseAddr(addr,remote,port);
         }
     }
@@ -179,81 +172,43 @@ int UdpPoint_RecvRaw(UdpPoint* point, char* buf, int length, char* remote, int* 
 
 void UdpPoint_Del(UdpPoint* point)
 {
-    Point * c { reinterpret_cast<Point * >(point) };
+    auto c { reinterpret_cast<Point * >(point) };
 
     if(c){
-
         close(c->fd);
-
         MParser_Del(c->parser);
-
         free(c);
     }
 }
 
 int UdpPoint_Available(UdpPoint* point)
 {
-    Point * c { reinterpret_cast<Point * >(point) };
-
-    int ret {-1};
-
-    if (c){
-
-        sockaddr_in raddr{};
-
-        socklen_t len {sizeof(raddr)};
-
-        ret = recvfrom(c->fd,g_temp,sizeof(g_temp),(MSG_PEEK | MSG_DONTWAIT),
-                        reinterpret_cast<sockaddr *>(&raddr),&len);
-    }
-
-    return ret;
+    auto c { reinterpret_cast<Point * >(point) };
+    return c ? has_data_helper(c->fd) : -1;
 }
 
 void UdpPoint_SetData(UdpPoint* point, void* data)
 {
-    Point * c { reinterpret_cast<Point * >(point) };
-
+    auto c { reinterpret_cast<Point * >(point) };
     if(c){
         c->data = data;
     }
 }
 
-void * UdpPoint_GetData(UdpPoint* point)
+void* UdpPoint_GetData(UdpPoint* point)
 {
-    Point * c { reinterpret_cast<Point * >(point) };
-
-    void * ret{};
-
-    if(c){
-        ret = c->data;
-    }
-
-    return ret;
+    auto c { reinterpret_cast<Point * >(point) };
+    return c ? c->data : nullptr;
 }
 
-int UdpPoint_SetOpt(UdpPoint* point, int level, int optname, const void* optval, unsigned int optlen)
+int UdpPoint_SetOpt(UdpPoint* point, int level, int optname, const void* optval, const unsigned int optlen)
 {
-    Point * c { reinterpret_cast<Point * >(point) };
-
-    int ret{-1};
-
-    if (c){
-        ret = setsockopt(c->fd,level,optname,optval,optlen);
-    }
-
-    return ret;
+    auto c { reinterpret_cast<Point * >(point) };
+    return c ? setsockopt(c->fd,level,optname,optval,optlen): -1;
 }
 
 int UdpPoint_GetOpt(UdpPoint* point, int level, int optname, void* optval, unsigned int* optlen)
 {
-    Point * c { reinterpret_cast<Point * >(point) };
-
-    int ret {-1};
-
-    if (c){
-        ret = getsockopt(c->fd,level,optname,optval,optlen);
-    }
-
-    return ret;
+    auto c { reinterpret_cast<Point * >(point) };
+    return c ? getsockopt(c->fd,level,optname,optval,optlen) : -1;
 }

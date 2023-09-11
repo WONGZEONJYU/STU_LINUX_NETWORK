@@ -3,13 +3,13 @@
 
 #include "message.h"
 
-typedef void UdpPoint;
+using UdpPoint = void;
 
 UdpPoint* UdpPoint_New(int port);
 UdpPoint* UdpPoint_From(int fd);
 
 int UdpPoint_SendMsg(UdpPoint* point, Message* msg, const char* remote, int port);
-int UdpPoint_SendRaw(UdpPoint* point, char* buf, int length, const char* remote, int port);
+int UdpPoint_SendRaw(UdpPoint* point, const char* buf, int length, const char* remote, int port);
 Message* UdpPoint_RecvMsg(UdpPoint* point, char* remote, int* port);
 int UdpPoint_RecvRaw(UdpPoint* point, char* buf, int length, char* remote, int* port);
 
