@@ -28,13 +28,13 @@ static void ParseAddr(struct sockaddr_in addr, char* ip, int* port)
 }
 
 //窥探一下当前有多少数据
-static auto has_data_helper(const int fd) 
+static auto has_data_helper(const int fd,const int flags = (MSG_PEEK | MSG_DONTWAIT ))
 {
     sockaddr_in raddr {};
     socklen_t addrlen {sizeof(raddr)};
     static char g_temp[1024 * 4]{};
     return recvfrom(fd, g_temp, sizeof(g_temp),
-                    MSG_PEEK | MSG_DONTWAIT, 
+                    flags, 
                     reinterpret_cast<sockaddr*>(&raddr), &addrlen) ;
 }
 
@@ -131,7 +131,7 @@ Message* UdpPoint_RecvMsg(UdpPoint* point, char* remote, int* port)
         sockaddr_in raddr {};
         socklen_t addrlen {sizeof(raddr)};
 
-        auto length { has_data_helper(c->fd) };//窥探一下当前有多少数据
+        auto length { has_data_helper(c->fd,MSG_PEEK) };//窥探一下当前有多少数据
 
         auto buf { (length > 0) ? reinterpret_cast<unsigned char *>(malloc(length)) : nullptr };
 

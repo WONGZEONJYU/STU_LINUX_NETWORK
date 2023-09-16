@@ -13,26 +13,35 @@ static void udp_raw_test()
 {
     auto p { UdpPoint_New(8888) };
     cout << "p = " << p << '\n';
-    // sleep(5);
-    // int nbytes { UdpPoint_Available(p) };
-    // cout << "nbytes = " << nbytes << '\n;
-}
 
-int main(int argc, char const *argv[])
-{
+    sleep(5);
 
-    udp_raw_test();
-    
+    cout << "nbytes = " << UdpPoint_Available(p) << '\n';
+
     char buf[128]{},ip[16]{};
     int port{};
-
-    auto m { UdpPoint_RecvMsg(p,ip,&port) };
-
-    //UdpPoint_RecvRaw(p,buf,sizeof(buf),ip,&port);
+    UdpPoint_RecvRaw(p,buf,sizeof(buf),ip,&port);
 
     cout << "ip : " << ip << 
             "\nport : " << port << 
-            //"\nbuf = " << hex << buf <<
+            "\nbuf = "  << buf << '\n';
+
+    UdpPoint_SendRaw(p,ip,strlen(ip),ip,port);
+
+    UdpPoint_Del(p);
+}
+
+static void message_test()
+{
+    auto p { UdpPoint_New(8888) };
+    cout << "p = " << p << '\n';
+
+    char ip[16]{};
+    int port{};
+    auto m { UdpPoint_RecvMsg(p,ip,&port) };
+
+    cout << "ip : " << ip << 
+            "\nport : " << port << 
             "\nmsg pointer: " << m <<
             "\nmsg->type = " << m->type << 
             "\nmsg->cmd = " << m->cmd << 
@@ -43,16 +52,17 @@ int main(int argc, char const *argv[])
         cout << "0x" << hex << static_cast<int>(m->payload[i]) << " ";
     }
 
-    // for (int i {}; i < nbytes; i++) {
-    //     cout << hex << static_cast<unsigned short>(static_cast<unsigned char>(buf[i]));
-    // }
-
     cout << '\n';
 
-    //UdpPoint_SendRaw(p,ip,strlen(ip),ip,port);
-
     UdpPoint_SendMsg(p,m,ip,port);
+
     free(m);
     UdpPoint_Del(p);
+}
+
+int main(int argc, char const *argv[])
+{
+    //udp_raw_test();
+    //message_test();
     return 0;
 }
