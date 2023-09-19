@@ -68,7 +68,7 @@ UdpPoint* UdpPoint_New(const int port)
 
 UdpPoint* UdpPoint_From(const int fd)
 {
-    auto ret { reinterpret_cast<Point * >(malloc(sizeof(Point))) };
+    auto ret { static_cast<Point * >(malloc(sizeof(Point))) };
 
     if (ret){
         ret->fd = fd;
@@ -81,7 +81,7 @@ UdpPoint* UdpPoint_From(const int fd)
 
 int UdpPoint_SendMsg(UdpPoint* point, Message* msg, const char* remote, int port)
 {
-    auto c { reinterpret_cast<Point * >(point) } ;
+    auto c { static_cast<Point * >(point) } ;
 
     int ret {};
 
@@ -101,7 +101,7 @@ int UdpPoint_SendMsg(UdpPoint* point, Message* msg, const char* remote, int port
 
 int UdpPoint_SendRaw(UdpPoint* point, const char* buf,const int length, const char* remote,const int port)
 {
-    auto c { reinterpret_cast<Point * >(point) } ;
+    auto c { static_cast<Point * >(point) } ;
 
     int ret {};
 
@@ -123,7 +123,7 @@ int UdpPoint_SendRaw(UdpPoint* point, const char* buf,const int length, const ch
 
 Message* UdpPoint_RecvMsg(UdpPoint* point, char* remote, int* port)
 {
-    auto c { reinterpret_cast<Point * >(point) };
+    auto c { static_cast<Point * >(point) };
     Message* ret{};
 
     if (c){
@@ -152,7 +152,7 @@ Message* UdpPoint_RecvMsg(UdpPoint* point, char* remote, int* port)
 
 int UdpPoint_RecvRaw(UdpPoint* point, char* buf, const int length, char* remote, int* port)
 {
-    auto c { reinterpret_cast<Point * >(point) };
+    auto c { static_cast<Point * >(point) };
 
     int ret {-1};
 
@@ -172,7 +172,7 @@ int UdpPoint_RecvRaw(UdpPoint* point, char* buf, const int length, char* remote,
 
 void UdpPoint_Del(UdpPoint* point)
 {
-    auto c { reinterpret_cast<Point * >(point) };
+    auto c { static_cast<Point * >(point) };
 
     if(c){
         close(c->fd);
@@ -183,13 +183,13 @@ void UdpPoint_Del(UdpPoint* point)
 
 int UdpPoint_Available(UdpPoint* point)
 {
-    auto c { reinterpret_cast<Point * >(point) };
+    auto c { static_cast<Point * >(point) };
     return c ? has_data_helper(c->fd) : -1;
 }
 
 void UdpPoint_SetData(UdpPoint* point, void* data)
 {
-    auto c { reinterpret_cast<Point * >(point) };
+    auto c { static_cast<Point * >(point) };
     if(c){
         c->data = data;
     }
@@ -197,18 +197,18 @@ void UdpPoint_SetData(UdpPoint* point, void* data)
 
 void* UdpPoint_GetData(UdpPoint* point)
 {
-    auto c { reinterpret_cast<Point * >(point) };
+    auto c { static_cast<Point * >(point) };
     return c ? c->data : nullptr;
 }
 
 int UdpPoint_SetOpt(UdpPoint* point, int level, int optname, const void* optval, const unsigned int optlen)
 {
-    auto c { reinterpret_cast<Point * >(point) };
+    auto c { static_cast<Point * >(point) };
     return c ? setsockopt(c->fd,level,optname,optval,optlen): -1;
 }
 
 int UdpPoint_GetOpt(UdpPoint* point, int level, int optname, void* optval, unsigned int* optlen)
 {
-    auto c { reinterpret_cast<Point * >(point) };
+    auto c { static_cast<Point * >(point) };
     return c ? getsockopt(c->fd,level,optname,optval,optlen) : -1;
 }

@@ -21,7 +21,7 @@ struct Server
 
 TcpServer* TcpServer_New()
 {
-    auto ret { reinterpret_cast<Server*>( malloc(sizeof(Server)) ) };
+    auto ret { static_cast<Server*>( malloc(sizeof(Server)) ) };
  
     if (ret) {
         ret->fd = -1;
@@ -36,7 +36,7 @@ TcpServer* TcpServer_New()
 
 int TcpServer_Start(TcpServer* server,const int port,const int max)
 {
-    auto s { reinterpret_cast<Server *>(server) };
+    auto s { static_cast<Server *>(server) };
 
     if (s && (!s->valid)) {
         s->fd = socket(PF_INET,SOCK_STREAM,0);
@@ -56,7 +56,7 @@ int TcpServer_Start(TcpServer* server,const int port,const int max)
 
 void TcpServer_Stop(TcpServer* server)
 {
-    auto s {reinterpret_cast<Server *>(server)};
+    auto s {static_cast<Server *>(server)};
     if (s){
         s->valid = 0;
         close(s->fd);
@@ -69,7 +69,7 @@ void TcpServer_Stop(TcpServer* server)
 
 void TcpServer_SetListener(TcpServer* server,Listener listener)
 {
-    auto s {reinterpret_cast<Server *>(server)};
+    auto s {static_cast<Server *>(server)};
     if (s){
         s->cb = listener;
     }
@@ -77,7 +77,7 @@ void TcpServer_SetListener(TcpServer* server,Listener listener)
 
 int TcpServer_IsValid(TcpServer* server)
 {
-    auto s {reinterpret_cast<Server *>(server)};
+    auto s {static_cast<Server *>(server)};
     return s ? s->valid : 0;
 }
 
@@ -137,7 +137,7 @@ static int SelectHandler(Server* s,
 
 void TcpServer_DoWork(TcpServer* server)
 {
-    auto s {reinterpret_cast<Server*>(server)};
+    auto s {static_cast<Server*>(server)};
 
     if (s && s->valid){
 
@@ -162,7 +162,7 @@ void TcpServer_DoWork(TcpServer* server)
 
 TcpClient* TcpServer_Accept(TcpServer* server)
 {
-    auto s {reinterpret_cast<Server *>(server)};
+    auto s {static_cast<Server *>(server)};
     TcpClient* ret {};
 
     if (s){
@@ -191,13 +191,13 @@ void TcpServer_Del(TcpServer* server)
 int TcpServer_SetOpt(TcpServer* server,const int level,const int optname, 
                     const void* optval, unsigned int const optlen)
 {
-    auto s {reinterpret_cast<Server *>(server)};
+    auto s {static_cast<Server *>(server)};
     return s ? setsockopt(s->fd,level,optname,optval,optlen) : -1;
 }
 
 int TcpServer_GetOpt(TcpServer* server, int level, int optname, 
                     void* optval, unsigned int* optlen)
 {
-    auto s {reinterpret_cast<Server*>(server)};
+    auto s {static_cast<Server*>(server)};
     return s ? getsockopt(s->fd,level,optname,optval,optlen) : -1;
 }

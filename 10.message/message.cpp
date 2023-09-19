@@ -10,7 +10,7 @@ Message * Message_New(unsigned short const type,
                     const char * payload,
                     unsigned int const length)
 {
-    Message * ret {reinterpret_cast<Message *>(malloc(sizeof(Message) + length))};
+    Message * ret {static_cast<Message *>(malloc(sizeof(Message) + length))};
 
     if (ret){
         ret->type = type;

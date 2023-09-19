@@ -71,7 +71,7 @@ MParser* MParser_New()
     auto ret {calloc(1,sizeof(MsgParser))};
 
     if (ret){
-        InitState(reinterpret_cast<MsgParser * >(ret));
+        InitState(static_cast<MsgParser * >(ret));
     }
 
     return ret;
@@ -79,7 +79,7 @@ MParser* MParser_New()
 
 Message* MParser_ReadMem(MParser* parser,unsigned char * mem,unsigned int length)
 {
-    auto p { reinterpret_cast<MsgParser *>(parser) };
+    auto p { static_cast<MsgParser *>(parser) };
 
     Message * ret {};
 
@@ -133,7 +133,7 @@ Message* MParser_ReadFd(MParser * parser,int fd)
 {
     Message * ret {};
 
-    auto p {reinterpret_cast<MsgParser *>(parser)};
+    auto p {static_cast<MsgParser *>(parser)};
 
     if ((-1 != fd) && p){
 
@@ -181,7 +181,7 @@ Message* MParser_ReadFd(MParser * parser,int fd)
 
 void MParser_Reset(MParser * parser)
 {
-    auto p {reinterpret_cast<MsgParser *>(parser)};
+    auto p {static_cast<MsgParser *>(parser)};
 
     if (p){
         InitState(p);
@@ -190,7 +190,7 @@ void MParser_Reset(MParser * parser)
 
 void MParser_Del(MParser * parser)
 {
-    auto p {reinterpret_cast<MsgParser *>(parser)};
+    auto p {static_cast<MsgParser *>(parser)};
 
     if (p){
         free(p->msg);
